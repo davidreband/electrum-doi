@@ -4,7 +4,7 @@ LICENCE.DOGE
 MANIFEST.in
 README.rst
 RELEASE-NOTES
-electrum.desktop
+electrum-doi.desktop
 run_electrum
 setup.cfg
 setup.py
