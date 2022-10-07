@@ -7,7 +7,7 @@
 ;Variables
 
   !define PRODUCT_NAME "Electrum-DOI"
-  !define PRODUCT_WEB_SITE "https://github.com/Doichain/electrum-doi"
+  !define PRODUCT_WEB_SITE "https://github.com/davidreband/electrum-doi"
   !define PRODUCT_PUBLISHER "WEBanizer AG"
   !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 

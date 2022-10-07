@@ -42,7 +42,7 @@ else
        umask 0022 && \
        mkdir -p $FRESH_CLONE && \
        cd $FRESH_CLONE  && \
-       git clone https://github.com/Doichain/electrum-doi.git &&\
+       git clone https://github.com/davidreband/electrum-doi.git &&\
        cd electrum
    git checkout "${COMMIT}^{commit}"
    sudo docker run -it \
@@ -87,7 +87,7 @@ else
         sudo rm -rf $FRESH_CLONE && \
         mkdir -p $FRESH_CLONE && \
         cd $FRESH_CLONE  && \
-        git clone https://github.com/Doichain/electrum-doi.git && \
+        git clone https://github.com/davidreband/electrum-doi.git && \
         cd electrum
     git checkout "${COMMIT}^{commit}"
     sudo docker run -it \
@@ -117,7 +117,7 @@ else
         umask 0022 && \
         mkdir -p $FRESH_CLONE && \
         cd $FRESH_CLONE  && \
-        git clone https://github.com/Doichain/electrum-doi.git && \
+        git clone https://github.com/davidreband/electrum-doi.git && \
         cd electrum
     git checkout "${COMMIT}^{commit}"
     mkdir --parents $PWD/.buildozer/.gradle
