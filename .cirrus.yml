@@ -10,12 +10,10 @@ task:
         TOXENV: py3
         ELECTRUM_PYTHON_NAME: python3
       matrix:
-      - env:
-           ELECTRUM_PYTHON_VERSION: 3.6
-      - env:
+       - env:
            ELECTRUM_PYTHON_VERSION: 3.7
        - env:
-           ELECTRUM_PYTHON_VERSION: 3.8
+           ELECTRUM_PYTHON_VERSION: 3.8    
        - env:
            ELECTRUM_PYTHON_VERSION: 3.9
        - env:
