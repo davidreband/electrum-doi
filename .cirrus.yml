@@ -9,11 +9,7 @@ task:
         ELECTRUM_IMAGE: python:$ELECTRUM_PYTHON_VERSION
         TOXENV: py3
         ELECTRUM_PYTHON_NAME: python3
-      matrix:
-       - env:
-           ELECTRUM_PYTHON_VERSION: 3.7
-       - env:
-           ELECTRUM_PYTHON_VERSION: 3.8    
+      matrix:          
        - env:
            ELECTRUM_PYTHON_VERSION: 3.9
        - env:

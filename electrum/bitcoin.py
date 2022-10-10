@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Electrum-DOI -lightweight Doichain client
+# Electrum - lightweight Bitcoin client
 # Copyright (C) 2011 thomasv@gitorious
 #
 # Permission is hereby granted, free of charge, to any person
@@ -218,9 +218,8 @@ def int_to_hex(i: int, length: int=1) -> str:
     return rev_hex(s)
 
 def script_num_to_hex(i: int) -> str:
-    """See CScriptNum in Doichain Core.
+    """See CScriptNum in Bitcoin Core.
     Encodes an integer as hex, to be used in script.
-
     ported from https://github.com/bitcoin/bitcoin/blob/8cbc5c4be4be22aca228074f087a374a7ec38be8/src/script/script.h#L326
     """
     if i == 0:
@@ -278,7 +277,6 @@ def push_script(data: str) -> str:
     """Returns pushed data to the script, automatically
     choosing canonical opcodes depending on the length of the data.
     hex -> hex
-
     ported from https://github.com/btcsuite/btcd/blob/fdc2bc867bda6b351191b5872d2da8270df00d13/txscript/scriptbuilder.go#L128
     """
     data = bfh(data)
@@ -318,7 +316,7 @@ def construct_witness(items: Sequence[Union[str, int, bytes]]) -> str:
 
 
 def construct_script(items: Sequence[Union[str, int, bytes, opcodes]]) -> str:
-    """Constructs Doichain script from given items."""
+    """Constructs bitcoin script from given items."""
     script = ''
     for item in items:
         if isinstance(item, opcodes):
@@ -349,12 +347,16 @@ def relayfee(network: 'Network' = None) -> int:
 
 
 # see https://github.com/bitcoin/bitcoin/blob/a62f0ed64f8bbbdfe6467ac5ce92ef5b5222d1bd/src/policy/policy.cpp#L14
-DUST_LIMIT_DEFAULT_SAT_LEGACY = 546
-DUST_LIMIT_DEFAULT_SAT_SEGWIT = 294
+# and https://github.com/lightningnetwork/lightning-rfc/blob/7e3dce42cbe4fa4592320db6a4e06c26bb99122b/03-transactions.md#dust-limits
+DUST_LIMIT_P2PKH = 546
+DUST_LIMIT_P2SH = 540
+DUST_LIMIT_UNKNOWN_SEGWIT = 354
+DUST_LIMIT_P2WSH = 330
+DUST_LIMIT_P2WPKH = 294
 
 
 def dust_threshold(network: 'Network' = None) -> int:
-    """Returns the dust limit in swartzs."""
+    """Returns the dust limit in satoshis."""
     # Change <= dust threshold is added to the tx fee
     dust_lim = 182 * 3 * relayfee(network)  # in msat
     # convert to sat, but round up:
@@ -457,7 +459,7 @@ def script_to_address(script: str, *, net=None) -> str:
 def address_to_script(addr: str, *, net=None) -> str:
     if net is None: net = constants.net
     if not is_address(addr, net=net):
-        raise BitcoinException(f"invalid Doichain address: {addr}")
+        raise BitcoinException(f"invalid bitcoin address: {addr}")
     witver, witprog = segwit_addr.decode_segwit_address(net.SEGWIT_HRP, addr)
     if witprog is not None:
         if not (0 <= witver <= 16):
@@ -481,23 +483,30 @@ class OnchainOutputType(Enum):
     P2SH = enum.auto()
     WITVER0_P2WPKH = enum.auto()
     WITVER0_P2WSH = enum.auto()
+    WITVER1_P2TR = enum.auto()
 
 
-def address_to_hash(addr: str, *, net=None) -> Tuple[OnchainOutputType, bytes]:
+def address_to_payload(addr: str, *, net=None) -> Tuple[OnchainOutputType, bytes]:
     """Return (type, pubkey hash / witness program) for an address."""
     if net is None: net = constants.net
     if not is_address(addr, net=net):
-        raise BitcoinException(f"invalid Doichain address: {addr}")
+        raise BitcoinException(f"invalid bitcoin address: {addr}")
     witver, witprog = segwit_addr.decode_segwit_address(net.SEGWIT_HRP, addr)
     if witprog is not None:
-        if witver != 0:
-            raise BitcoinException(f"not implemented handling for witver={witver}")
-        if len(witprog) == 20:
-            return OnchainOutputType.WITVER0_P2WPKH, bytes(witprog)
-        elif len(witprog) == 32:
-            return OnchainOutputType.WITVER0_P2WSH, bytes(witprog)
+        if witver == 0:
+            if len(witprog) == 20:
+                return OnchainOutputType.WITVER0_P2WPKH, bytes(witprog)
+            elif len(witprog) == 32:
+                return OnchainOutputType.WITVER0_P2WSH, bytes(witprog)
+            else:
+                raise BitcoinException(f"unexpected length for segwit witver=0 witprog: len={len(witprog)}")
+        elif witver == 1:
+            if len(witprog) == 32:
+                return OnchainOutputType.WITVER1_P2TR, bytes(witprog)
+            else:
+                raise BitcoinException(f"unexpected length for segwit witver=1 witprog: len={len(witprog)}")
         else:
-            raise BitcoinException(f"unexpected length for segwit witver=0 witprog: len={len(witprog)}")
+            raise BitcoinException(f"not implemented handling for witver={witver}")
     addrtype, hash_160_ = b58_address_to_hash160(addr)
     if addrtype == net.ADDRTYPE_P2PKH:
         return OnchainOutputType.P2PKH, hash_160_
@@ -558,7 +567,7 @@ def base_encode(v: bytes, *, base: int) -> str:
         result.append(chars[mod])
         long_value = div
     result.append(chars[long_value])
-    # Doichain does a little leading-zero-compression:
+    # Bitcoin does a little leading-zero-compression:
     # leading 0-bytes in the input become leading-1s
     nPad = 0
     for c in v:
