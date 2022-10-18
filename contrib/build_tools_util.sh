@@ -23,7 +23,7 @@ function warn {
 function verify_signature() {
     local file=$1 keyring=$2 out=
     if out=$(gpg --no-default-keyring --keyring "$keyring" --status-fd 1 --verify "$file" 2>/dev/null) &&
-       echo "$out" | grep -qs "^\[GNUPG:\] VALIDSIG "; then
+        echo "$out" | grep -qs "^\[GNUPG:\] VALIDSIG "; then
         return 0
     else
         echo "$out" >&2
@@ -52,23 +52,23 @@ function download_if_not_exist() {
 
 # https://github.com/travis-ci/travis-build/blob/master/lib/travis/build/templates/header.sh
 function retry() {
-  local result=0
-  local count=1
-  while [ $count -le 3 ]; do
-    [ $result -ne 0 ] && {
-      echo -e "\nThe command \"$@\" failed. Retrying, $count of 3.\n" >&2
+    local result=0
+    local count=1
+    while [ $count -le 3 ]; do
+        [ $result -ne 0 ] && {
+            echo -e "\nThe command \"$@\" failed. Retrying, $count of 3.\n" >&2
+        }
+        ! { "$@"; result=$?; }
+        [ $result -eq 0 ] && break
+        count=$(($count + 1))
+        sleep 1
+    done
+
+    [ $count -gt 3 ] && {
+        echo -e "\nThe command \"$@\" failed 3 times.\n" >&2
     }
-    ! { "$@"; result=$?; }
-    [ $result -eq 0 ] && break
-    count=$(($count + 1))
-    sleep 1
-  done
 
-  [ $count -gt 3 ] && {
-    echo -e "\nThe command \"$@\" failed 3 times.\n" >&2
-  }
-
-  return $result
+    return $result
 }
 
 function gcc_with_triplet()
@@ -116,6 +116,7 @@ fi
 
 
 export SOURCE_DATE_EPOCH=1530212462
+export ZERO_AR_DATE=1 # for macOS
 export PYTHONHASHSEED=22
 # Set the build type, overridden by wine build
 export BUILD_TYPE="${BUILD_TYPE:-$(uname | tr '[:upper:]' '[:lower:]')}"

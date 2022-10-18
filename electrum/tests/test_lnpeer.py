@@ -610,6 +610,7 @@ class TestPeer(TestCaseForTestnet):
     def test_reestablish_replay_messages_rev_then_sig(self):
         """
         See https://github.com/lightning/bolts/pull/810#issue-728299277
+
         Rev then Sig
         A            B
          <---add-----
@@ -617,6 +618,7 @@ class TestPeer(TestCaseForTestnet):
          <---sig-----
          ----rev----x
          ----sig----x
+
         A needs to retransmit:
         ----rev-->      (note that 'add' can be first too)
         ----add-->
@@ -662,6 +664,7 @@ class TestPeer(TestCaseForTestnet):
     def test_reestablish_replay_messages_sig_then_rev(self):
         """
         See https://github.com/lightning/bolts/pull/810#issue-728299277
+
         Sig then Rev
         A            B
          <---add-----
@@ -669,6 +672,7 @@ class TestPeer(TestCaseForTestnet):
          ----sig----x
          <---sig-----
          ----rev----x
+
         A needs to retransmit:
         ----add-->
         ----sig-->
@@ -1564,4 +1568,6 @@ class TestPeer(TestCaseForTestnet):
 
 
 def run(coro):
+
     return asyncio.run_coroutine_threadsafe(coro, loop=util.get_asyncio_loop()).result()
+

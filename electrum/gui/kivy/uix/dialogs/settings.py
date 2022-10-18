@@ -1,3 +1,5 @@
+from typing import TYPE_CHECKING
+
 from kivy.app import App
 from kivy.factory import Factory
 from kivy.properties import ObjectProperty
@@ -13,6 +15,10 @@ from electrum.gui import messages
 from electrum.gui.kivy import KIVY_GUI_PATH
 
 from .choice_dialog import ChoiceDialog
+
+if TYPE_CHECKING:
+    from ...main_window import ElectrumWindow
+
 
 Builder.load_string('''
 #:import partial functools.partial
@@ -96,6 +102,13 @@ Builder.load_string('''
                     title: _('Lightning Routing') + ': ' + self.status
                     description: _("Use trampoline routing or gossip.")
                     action: partial(root.routing_dialog, self)
+                CardSeparator
+                SettingsItem:
+                    disabled: bool(app.electrum_config.get('verbosity')) and not app.enable_debug_logs
+                    status: 'ON' if (bool(app.electrum_config.get('verbosity')) or app.enable_debug_logs) else 'OFF'
+                    title: _('Enable debug logs') + ': ' + self.status
+                    description: "(developer) Log to stderr, to inspect with logcat."
+                    action: partial(root.boolean_dialog, 'enable_debug_logs', _('Debug Logs'), self.description)
 
                 # disabled: there is currently only one coin selection policy
                 #CardSeparator
@@ -110,7 +123,7 @@ Builder.load_string('''
 
 class SettingsDialog(Factory.Popup):
 
-    def __init__(self, app):
+    def __init__(self, app: 'ElectrumWindow'):
         self.app = app
         self.plugins = self.app.plugins
         self.config = self.app.electrum_config
@@ -130,10 +143,11 @@ class SettingsDialog(Factory.Popup):
         self.wallet = self.app.wallet
         self.use_encryption = self.wallet.has_password() if self.wallet else False
         self.has_pin_code = self.app.has_pin_code()
-        self.enable_toggle_use_recoverable_channels = bool(self.wallet.lnworker and self.wallet.lnworker.has_deterministic_node_id())
+        self.enable_toggle_use_recoverable_channels = bool(self.wallet.lnworker and self.wallet.lnworker.can_have_recoverable_channels())
 
-    def get_language_name(self):
-        return languages.get(self.config.get('language', 'en_UK'), '')
+    def get_language_name(self) -> str:
+        lang = self.config.get('language') or ''
+        return languages.get(lang) or languages.get('') or ''
 
     def change_password(self, dt):
         self.app.change_password(self.update)
@@ -143,7 +157,7 @@ class SettingsDialog(Factory.Popup):
 
     def language_dialog(self, item, dt):
         if self._language_dialog is None:
-            l = self.config.get('language', 'en_UK')
+            l = self.config.get('language') or ''
             def cb(key):
                 self.config.set_key("language", key, True)
                 item.lang = self.get_language_name()

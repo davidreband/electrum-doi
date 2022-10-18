@@ -1,33 +1,29 @@
-Source tarballs
-===============
+# Source tarballs
 
 ✓ _This file should be reproducible, meaning you should be able to generate
    distributables that match the official releases._
 
 This assumes an Ubuntu (x86_64) host, but it should not be too hard to adapt to another
-similar system. The docker commands should be executed in the project's root
-folder.
+similar system.
+
+We distribute two tarballs, a "normal" one (the default, recommended for users),
+and a strictly source-only one (for Linux distro packagers).
+The normal tarball, in addition to including everything from
+the source-only one, also includes:
+- compiled (`.mo`) locale files (in addition to source `.po` locale files)
+- compiled (`_pb2.py`) protobuf files (in addition to source `.proto` files)
+- the `packages/` folder containing source-only pure-python runtime dependencies
+
+
+## Build steps
 
 1. Install Docker
 
-    ```
-    $ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-    $ sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-    $ sudo apt-get update
-    $ sudo apt-get install -y docker-ce
-    ```
+    See `contrib/docker_notes.md`.
 
-2. Build image
+2. Build tarball
 
-    ```
-    $ sudo docker build -t electrum-sdist-builder-img contrib/build-linux/sdist
-    ```
-
-3. Build source tarballs
-
-    It's recommended to build from a fresh clone
-    (but you can skip this if reproducibility is not necessary).
-
+    (set envvar `OMIT_UNCLEAN_FILES=1` to build the "source-only" tarball)
     ```
     $ FRESH_CLONE=contrib/build-linux/sdist/fresh_clone && \
         sudo rm -rf $FRESH_CLONE && \
@@ -37,16 +33,10 @@ folder.
         git clone https://github.com/Doichain/electrum-doi.git && \
         cd electrum
     ```
+    If you want reproducibility, try instead e.g.:
+    ```
+    $ ELECBUILD_COMMIT=HEAD ELECBUILD_NOCACHE=1 ./build.sh
+    $ ELECBUILD_COMMIT=HEAD ELECBUILD_NOCACHE=1 OMIT_UNCLEAN_FILES=1 ./build.sh
+    ```
 
-    And then build from this directory:
-    ```
-    $ git checkout $REV
-    $ sudo docker run -it \
-        --name electrum-sdist-builder-cont \
-        -v $PWD:/opt/electrum \
-        --rm \
-        --workdir /opt/electrum/contrib/build-linux/sdist \
-        electrum-sdist-builder-img \
-        ./build.sh
-    ```
-4. The generated distributables are in `./dist`.
+3. The generated distributables are in `./dist`.

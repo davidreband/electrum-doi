@@ -1,4 +1,8 @@
 #!/bin/bash
+#
+# env vars:
+# - ELECBUILD_NOCACHE: if set, forces rebuild of docker image
+# - ELECBUILD_COMMIT: if set, do a fresh clone and git checkout
 
 set -e
 
@@ -35,33 +39,47 @@ export WINE_PYTHON="wine $WINE_PYHOME/python.exe -OO -B"
 
 . "$CONTRIB"/build_tools_util.sh
 
-info "Clearing $here/build and $here/dist..."
-rm "$here"/build/* -rf
-rm "$here"/dist/* -rf
+info "Clearing $CONTRIB_WINE/dist..."
+rm -rf "$CONTRIB_WINE"/dist/*
 
-mkdir -p "$CACHEDIR" "$DLL_TARGET_DIR" "$PIP_CACHE_DIR"
 
-if [ -f "$DLL_TARGET_DIR/libsecp256k1-0.dll" ]; then
-    info "libsecp256k1 already built, skipping"
-else
-    "$CONTRIB"/make_libsecp256k1.sh || fail "Could not build libsecp"
+DOCKER_BUILD_FLAGS=""
+if [ ! -z "$ELECBUILD_NOCACHE" ] ; then
+    info "ELECBUILD_NOCACHE is set. forcing rebuild of docker image."
+    DOCKER_BUILD_FLAGS="--pull --no-cache"
 fi
 
-if [ -f "$DLL_TARGET_DIR/libzbar-0.dll" ]; then
-    info "libzbar already built, skipping"
+info "building docker image."
+docker build \
+    $DOCKER_BUILD_FLAGS \
+    -t electrum-wine-builder-img \
+    "$CONTRIB_WINE"
+
+# maybe do fresh clone
+if [ ! -z "$ELECBUILD_COMMIT" ] ; then
+    info "ELECBUILD_COMMIT=$ELECBUILD_COMMIT. doing fresh clone and git checkout."
+    FRESH_CLONE="$CONTRIB_WINE/fresh_clone/electrum" && \
+        rm -rf "$FRESH_CLONE" && \
+        umask 0022 && \
+        git clone "$PROJECT_ROOT" "$FRESH_CLONE" && \
+        cd "$FRESH_CLONE"
+    git checkout "$ELECBUILD_COMMIT"
+    PROJECT_ROOT_OR_FRESHCLONE_ROOT="$FRESH_CLONE"
 else
-    "$CONTRIB"/make_zbar.sh || fail "Could not build zbar"
+    info "not doing fresh clone."
 fi
 
-$here/prepare-wine.sh || fail "prepare-wine failed"
+info "building binary..."
+docker run -it \
+    --name electrum-wine-builder-cont \
+    -v "$PROJECT_ROOT_OR_FRESHCLONE_ROOT":/opt/wine64/drive_c/electrum \
+    --rm \
+    --workdir /opt/wine64/drive_c/electrum/contrib/build-wine \
+    electrum-wine-builder-img \
+    ./make_win.sh
 
-info "Resetting modification time in C:\Python..."
-# (Because of some bugs in pyinstaller)
-pushd /opt/wine64/drive_c/python*
-find -exec touch -d '2000-11-11T11:11:11+00:00' {} +
-popd
-ls -l /opt/wine64/drive_c/python*
-
-$here/build-electrum-git.sh || fail "build-electrum-git failed"
-
-info "Done."
+# make sure resulting binary location is independent of fresh_clone
+if [ ! -z "$ELECBUILD_COMMIT" ] ; then
+    mkdir --parents "$PROJECT_ROOT/contrib/build-wine/dist/"
+    cp -f "$FRESH_CLONE/contrib/build-wine/dist"/*.exe "$PROJECT_ROOT/contrib/build-wine/dist/"
+fi

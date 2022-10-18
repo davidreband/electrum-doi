@@ -5,8 +5,10 @@ set -e
 # Parameterize
 PYTHON_VERSION=3.9.11
 PY_VER_MAJOR="3.9"  # as it appears in fs paths
+
 PACKAGE=Electrum-DOI
 GIT_REPO=https://github.com/davidreband/electrum-doi
+
 
 export GCC_STRIP_BINARIES="1"
 export PYTHONDONTWRITEBYTECODE=1  # don't create __pycache__/ folders with .pyc files
@@ -256,4 +258,8 @@ DoCodeSignMaybe ".DMG" "dist/electrum-${VERSION}.dmg"
 if [ -z "$CODESIGN_CERT" ]; then
     warn "App was built successfully but was not code signed. Users may get security warnings from macOS."
     warn "Specify a valid code signing identity to enable code signing."
+<<<<<<< HEAD
 fi
+=======
+fi
+>>>>>>> 47c480be499d97ebac8611be744ea2015bb59f70

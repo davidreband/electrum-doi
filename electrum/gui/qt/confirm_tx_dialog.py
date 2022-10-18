@@ -26,17 +26,17 @@
 from decimal import Decimal
 from typing import TYPE_CHECKING, Optional, Union
 
-from PyQt5.QtWidgets import  QVBoxLayout, QLabel, QGridLayout, QPushButton, QLineEdit
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QVBoxLayout, QLabel, QGridLayout, QPushButton, QLineEdit
 
 from electrum.i18n import _
 from electrum.util import NotEnoughFunds, NoDynamicFeeEstimates
 from electrum.plugin import run_hook
 from electrum.transaction import Transaction, PartialTransaction
-from electrum.simple_config import FEERATE_WARNING_HIGH_FEE, FEE_RATIO_HIGH_WARNING
 from electrum.wallet import InternalAddressCorruption
 
 from .util import (WindowModalDialog, ColorScheme, HelpLabel, Buttons, CancelButton,
-                   BlockingWaitingDialog, PasswordLineEdit)
+                   BlockingWaitingDialog, PasswordLineEdit, WWLabel)
 
 from .fee_slider import FeeSlider, FeeComboBox
 
@@ -66,6 +66,9 @@ class TxEditor:
             self.update_tx()
             self.update()
             self.needs_update = False
+
+    def stop_editor_updates(self):
+        self.main_window.gui_object.timer.timeout.disconnect(self.timer_actions)
 
     def fee_slider_callback(self, dyn, pos, fee_rate):
         if dyn:
@@ -135,20 +138,26 @@ class ConfirmTxDialog(TxEditor, WindowModalDialog):
         self.setLayout(vbox)
         grid = QGridLayout()
         vbox.addLayout(grid)
+
+        msg = (_('The amount to be received by the recipient.') + ' '
+               + _('Fees are paid by the sender.'))
         self.amount_label = QLabel('')
-        grid.addWidget(QLabel(_("Amount to be sent") + ": "), 0, 0)
+        self.amount_label.setTextInteractionFlags(Qt.TextSelectableByMouse)
+        grid.addWidget(HelpLabel(_("Amount to be sent") + ": ", msg), 0, 0)
         grid.addWidget(self.amount_label, 0, 1)
 
         msg = _('Bitcoin transactions are in general not free. A transaction fee is paid by the sender of the funds.') + '\n\n'\
               + _('The amount of fee can be decided freely by the sender. However, transactions with low fees take more time to be processed.') + '\n\n'\
               + _('A suggested fee is automatically added to this field. You may override it. The suggested fee increases with the size of the transaction.')
         self.fee_label = QLabel('')
+        self.fee_label.setTextInteractionFlags(Qt.TextSelectableByMouse)
         grid.addWidget(HelpLabel(_("Mining fee") + ": ", msg), 1, 0)
         grid.addWidget(self.fee_label, 1, 1)
 
         self.extra_fee_label = QLabel(_("Additional fees") + ": ")
         self.extra_fee_label.setVisible(False)
         self.extra_fee_value = QLabel('')
+        self.extra_fee_value.setTextInteractionFlags(Qt.TextSelectableByMouse)
         self.extra_fee_value.setVisible(False)
         grid.addWidget(self.extra_fee_label, 2, 0)
         grid.addWidget(self.extra_fee_value, 2, 1)
@@ -159,7 +168,7 @@ class ConfirmTxDialog(TxEditor, WindowModalDialog):
         grid.addWidget(self.fee_slider, 5, 1)
         grid.addWidget(self.fee_combo, 5, 2)
 
-        self.message_label = QLabel(self.default_message())
+        self.message_label = WWLabel(self.default_message())
         grid.addWidget(self.message_label, 6, 0, 1, -1)
         self.pw_label = QLabel(_('Password'))
         self.pw_label.setVisible(self.password_required)
@@ -187,6 +196,8 @@ class ConfirmTxDialog(TxEditor, WindowModalDialog):
     def run(self):
         cancelled = not self.exec_()
         password = self.pw.text() or None
+        self.stop_editor_updates()
+        self.deleteLater()  # see #3956
         return cancelled, self.is_send, password, self.tx
 
     def on_send(self):
@@ -231,7 +242,7 @@ class ConfirmTxDialog(TxEditor, WindowModalDialog):
         self._update_amount_label()
 
         if self.not_enough_funds:
-            text = self.main_window.get_text_not_enough_funds_mentioning_frozen()
+            text = self.main_window.send_tab.get_text_not_enough_funds_mentioning_frozen()
             self.toggle_send_button(False, message=text)
             return
 

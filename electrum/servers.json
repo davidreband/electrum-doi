@@ -1,14 +1,17 @@
 {
+
     "itchy-jellyfish-89.doi.works": {
         "pruning": "-",
         "s": "50002",
         "version": "1.4"
     },
     "pink-deer-69.doi.works": {
+
         "pruning": "-",
         "s": "50002",
-        "version": "1.4"
+        "version": "1.4.2"
     },
+
     "big-parrot-60.doi.works": {
         "pruning": "-",
         "s": "50002",
@@ -19,4 +22,5 @@
         "s": "50002",
         "version": "1.4"
     }
+
 }

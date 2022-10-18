@@ -9,29 +9,15 @@ To generate an APK file, follow these instructions.
    binaries that match the official releases._
 
 This assumes an Ubuntu (x86_64) host, but it should not be too hard to adapt to another
-similar system. The docker commands should be executed in the project's root
-folder.
+similar system.
 
 1. Install Docker
 
-    ```
-    $ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-    $ sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-    $ sudo apt-get update
-    $ sudo apt-get install -y docker-ce
-    ```
+    See `contrib/docker_notes.md`.
 
-2. Build image
+2. Build binaries
 
-    ```
-    $ ./contrib/android/build_docker_image.sh
-    ```
-
-3. Build binaries
-
-    It's recommended to build from a fresh clone
-    (but you can skip this if reproducibility is not necessary).
-
+    The build script takes a few arguments. To see syntax, run it without providing any:
     ```
     $ FRESH_CLONE=contrib/android/fresh_clone && \
         sudo rm -rf $FRESH_CLONE && \
@@ -39,43 +25,28 @@ folder.
         mkdir -p $FRESH_CLONE && \
         cd $FRESH_CLONE  && \
         git clone https://github.com/Doichain/electrum-doi.git && \
-        cd electrum
+        cd electrum-doi
+    ```
+    For development, consider e.g. `$ ./build.sh kivy arm64-v8a debug`
+
+    If you want reproducibility, try instead e.g.:
+    ```
+    $ ELECBUILD_COMMIT=HEAD ELECBUILD_NOCACHE=1 ./build.sh kivy all release-unsigned
     ```
 
-    And then build from this directory:
-    ```
-    $ git checkout $REV
-    $ mkdir --parents $PWD/.buildozer/.gradle
-    $ sudo docker run -it --rm \
-        --name electrum-android-builder-cont \
-        -v $PWD:/home/user/wspace/electrum \
-        -v $PWD/.buildozer/.gradle:/home/user/.gradle \
-        -v ~/.keystore:/home/user/.keystore \
-        --workdir /home/user/wspace/electrum \
-        electrum-android-builder-img \
-        ./contrib/android/make_apk
-    ```
-    
-    Note: this builds a debug apk. `make_apk` takes an optional parameter
-    which can be either `release` or `release-unsigned`.
-    
-    This mounts the project dir inside the container,
-    and so the modifications will affect it, e.g. `.buildozer` folder
-    will be created.
-
-5. The generated binary is in `./bin`.
+3. The generated binary is in `./dist`.
 
 
 ## Verifying reproducibility and comparing against official binary
 
-Every user can verify that the official binary was created from the source code in this 
+Every user can verify that the official binary was created from the source code in this
 repository.
 
 1. Build your own binary as described above.
-   Make sure you don't build in `debug` mode (which is the default!),
+   Make sure you don't build in `debug` mode,
    instead use either of `release` or `release-unsigned`.
    If you build in `release` mode, the apk will be signed, which requires a keystore
-   that you need to create manually (see source of `make_apk` for an example).
+   that you need to create manually (see source of `make_apk.sh` for an example).
 2. Note that the binaries are not going to be byte-for-byte identical, as the official
    release is signed by a keystore that only the project maintainers have.
    You can use the `apkdiff.py` python script (written by the Signal developers) to compare
@@ -95,7 +66,7 @@ You probably need to clear the cache: `rm -rf .buildozer/android/platform/build-
 ### How do I deploy on connected phone for quick testing?
 Assuming `adb` is installed:
 ```
-$ adb -d install -r bin/Electrum-*-arm64-v8a-debug.apk
+$ adb -d install -r dist/Electrum-*-arm64-v8a-debug.apk
 $ adb shell monkey -p org.electrum.electrum 1
 ```
 
@@ -137,7 +108,7 @@ If you just follow the instructions above, you will build the apk
 in debug mode. The most notable difference is that the apk will be
 signed using a debug keystore. If you are planning to upload
 what you build to e.g. the Play Store, you should create your own
-keystore, back it up safely, and run `./contrib/make_apk release`.
+keystore, back it up safely, and run `./contrib/make_apk.sh release`.
 
 See e.g. [kivy wiki](https://github.com/kivy/kivy/wiki/Creating-a-Release-APK)
 and [android dev docs](https://developer.android.com/studio/build/building-cmdline#sign_cmdline).
@@ -152,9 +123,11 @@ $ run-as org.electrum.electrum ls /data/data/org.electrum.electrum/files/data
 $ run-as org.electrum.electrum cp /data/data/org.electrum.electrum/files/data/wallets/my_wallet /sdcard/some_path/my_wallet
 ```
 
+Or use Android Studio: "Device File Explorer", which can download/upload data directly from device (via adb).
+
 ### How to investigate diff between binaries if reproducibility fails?
 ```
-cd bin/
+cd dist/
 unzip Electrum-*.apk1 -d apk1
 mkdir apk1/assets/private_mp3/
 tar -xzvf apk1/assets/private.mp3 --directory apk1/assets/private_mp3/

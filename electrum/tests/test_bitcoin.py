@@ -88,6 +88,7 @@ def disable_ecdsa_r_value_grinding(func):
     """Function decorator to run a unit test with ecdsa R-value grinding disabled.
     This is used when we want to pass test vectors that were created without R-value grinding.
     (see https://github.com/bitcoin/bitcoin/pull/13666 )
+
     NOTE: this is inherently sequential;
     tests running in parallel would break things
     """

@@ -8,50 +8,10 @@ PACKAGE='Electrum-DOI'
 PYPKG='electrum'
 MAIN_SCRIPT='run_electrum'
 ICONS_FILE=PYPKG + '/gui/icons/electrum.icns'
-APP_SIGN = os.environ.get('APP_SIGN', '')
-
-def fail(*msg):
-    RED='\033[0;31m'
-    NC='\033[0m' # No Color
-    print("\r🗯 {}ERROR:{}".format(RED, NC), *msg)
-    sys.exit(1)
-
-def codesign(identity, binary):
-    d = os.path.dirname(binary)
-    saved_dir=None
-    if d:
-        # switch to directory of the binary so codesign verbose messages don't include long path
-        saved_dir = os.path.abspath(os.path.curdir)
-        os.chdir(d)
-        binary = os.path.basename(binary)
-    os.system("codesign -v -f -s '{}' '{}'".format(identity, binary))==0 or fail("Could not code sign " + binary)
-    if saved_dir:
-        os.chdir(saved_dir)
-
-def monkey_patch_pyinstaller_for_codesigning(identity):
-    # Monkey-patch PyInstaller so that we app-sign all binaries *after* they are modified by PyInstaller
-    # If we app-sign before that point, the signature will be invalid because PyInstaller modifies
-    # @loader_path in the Mach-O loader table.
-    try:
-        import PyInstaller.depend.dylib
-        _saved_func = PyInstaller.depend.dylib.mac_set_relative_dylib_deps
-    except (ImportError, NameError, AttributeError):
-        # Hmm. Likely wrong PyInstaller version.
-        fail("Could not monkey-patch PyInstaller for code signing. Please ensure that you are using PyInstaller 3.4.")
-    _signed = set()
-    def my_func(fn, distname):
-        _saved_func(fn, distname)
-        if  (fn, distname) not in _signed:
-            codesign(identity, fn)
-            _signed.add((fn,distname)) # remember we signed it so we don't sign again
-    PyInstaller.depend.dylib.mac_set_relative_dylib_deps = my_func
 
 
-for i, x in enumerate(sys.argv):
-    if x == '--name':
-        VERSION = sys.argv[i+1]
-        break
-else:
+VERSION = os.environ.get("ELECTRUM_VERSION")
+if not VERSION:
     raise Exception('no version')
 
 electrum = os.path.abspath(".") + "/"
@@ -67,12 +27,15 @@ hiddenimports += collect_submodules('keepkeylib')
 hiddenimports += collect_submodules('websocket')
 hiddenimports += collect_submodules('ckcc')
 hiddenimports += collect_submodules('bitbox02')
+hiddenimports += ['electrum.plugins.jade.jade']
+hiddenimports += ['electrum.plugins.jade.jadepy.jade']
 hiddenimports += ['PyQt5.QtPrintSupport']  # needed by Revealer
 
 datas = [
     (electrum + PYPKG + '/*.json', PYPKG),
     (electrum + PYPKG + '/lnwire/*.csv', PYPKG + '/lnwire'),
     (electrum + PYPKG + '/wordlist/english.txt', PYPKG + '/wordlist'),
+    (electrum + PYPKG + '/wordlist/slip39.txt', PYPKG + '/wordlist'),
     (electrum + PYPKG + '/locale', PYPKG + '/locale'),
     (electrum + PYPKG + '/plugins', PYPKG + '/plugins'),
     (electrum + PYPKG + '/gui/icons', PYPKG + '/gui/icons'),
@@ -84,12 +47,10 @@ datas += collect_data_files('keepkeylib')
 datas += collect_data_files('ckcc')
 datas += collect_data_files('bitbox02')
 
-# Add the QR Scanner helper app
-datas += [(electrum + "contrib/osx/CalinsQRReader/build/Release/CalinsQRReader.app", "./contrib/osx/CalinsQRReader/build/Release/CalinsQRReader.app")]
-
 # Add libusb so Trezor and Safe-T mini will work
 binaries = [(electrum + "contrib/osx/libusb-1.0.dylib", ".")]
 binaries += [(electrum + "contrib/osx/libsecp256k1.0.dylib", ".")]
+binaries += [(electrum + "contrib/osx/libzbar.0.dylib", ".")]
 
 # Workaround for "Retro Look":
 binaries += [b for b in collect_dynamic_libs('PyQt5') if 'macstyle' in b[0]]
@@ -97,6 +58,7 @@ binaries += [b for b in collect_dynamic_libs('PyQt5') if 'macstyle' in b[0]]
 # We don't put these files in to actually include them in the script but to make the Analysis method scan them for imports
 a = Analysis([electrum+ MAIN_SCRIPT,
               electrum+'electrum/gui/qt/main_window.py',
+              electrum+'electrum/gui/qt/qrreader/qtmultimedia/camera_dialog.py',
               electrum+'electrum/gui/text.py',
               electrum+'electrum/util.py',
               electrum+'electrum/wallet.py',
@@ -105,13 +67,13 @@ a = Analysis([electrum+ MAIN_SCRIPT,
               electrum+'electrum/dnssec.py',
               electrum+'electrum/commands.py',
               electrum+'electrum/plugins/cosigner_pool/qt.py',
-              electrum+'electrum/plugins/email_requests/qt.py',
               electrum+'electrum/plugins/trezor/qt.py',
               electrum+'electrum/plugins/safe_t/client.py',
               electrum+'electrum/plugins/safe_t/qt.py',
               electrum+'electrum/plugins/keepkey/qt.py',
               electrum+'electrum/plugins/ledger/qt.py',
               electrum+'electrum/plugins/coldcard/qt.py',
+              electrum+'electrum/plugins/jade/qt.py',
               ],
              binaries=binaries,
              datas=datas,
@@ -133,10 +95,6 @@ for x in a.binaries.copy():
             a.binaries.remove(x)
             print('----> Removed x =', x)
 
-# If code signing, monkey-patch in a code signing step to pyinstaller. See: https://github.com/spesmilo/electrum/issues/4994
-if APP_SIGN:
-    monkey_patch_pyinstaller_for_codesigning(APP_SIGN)
-
 pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 
 exe = EXE(
@@ -149,6 +107,7 @@ exe = EXE(
     upx=True,
     icon=electrum+ICONS_FILE,
     console=False,
+    target_arch='x86_64',  # TODO investigate building 'universal2'
 )
 
 app = BUNDLE(
@@ -162,6 +121,13 @@ app = BUNDLE(
     bundle_identifier=None,
     info_plist={
         'NSHighResolutionCapable': 'True',
-        'NSSupportsAutomaticGraphicsSwitching': 'True'
+        'NSSupportsAutomaticGraphicsSwitching': 'True',
+        'CFBundleURLTypes':
+            [{
+                'CFBundleURLName': 'bitcoin',
+                'CFBundleURLSchemes': ['bitcoin', 'lightning', ],
+            }],
+        'LSMinimumSystemVersion': '10.13.0',
+        'NSCameraUsageDescription': 'Electrum would like to access the camera to scan for QR codes',
     },
 )

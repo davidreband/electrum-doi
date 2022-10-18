@@ -2,7 +2,7 @@
 
 NAME_ROOT=electrum-doi
 
-export PYTHONDONTWRITEBYTECODE=1
+export PYTHONDONTWRITEBYTECODE=1  # don't create __pycache__/ folders with .pyc files
 
 
 # Let's begin!
@@ -12,16 +12,13 @@ set -e
 
 pushd $WINEPREFIX/drive_c/electrum-doi
 
-VERSION=`git describe --tags --dirty --always`
+VERSION=$(git describe --tags --dirty --always)
 info "Last commit: $VERSION"
 
 # Load electrum-locale for this release
 git submodule update --init
 
-pushd ./contrib/deterministic-build/electrum-locale
-if ! which msgfmt > /dev/null 2>&1; then
-    fail "Please install gettext"
-fi
+LOCALE="$WINEPREFIX/drive_c/electrum/electrum/locale/"
 # we want the binary to have only compiled (.mo) locale files; not source (.po) files
 rm -rf "$WINEPREFIX/drive_c/electrum-doi/electrum/locale/"
 for i in ./locale/*; do
@@ -31,18 +28,26 @@ for i in ./locale/*; do
 done
 popd
 
-find -exec touch -d '2000-11-11T11:11:11+00:00' {} +
+find -exec touch -h -d '2000-11-11T11:11:11+00:00' {} +
 popd
 
 
-# Install frozen dependencies
-$WINE_PYTHON -m pip install --no-dependencies --no-warn-script-location \
+# opt out of compiling C extensions
+export AIOHTTP_NO_EXTENSIONS=1
+export YARL_NO_EXTENSIONS=1
+export MULTIDICT_NO_EXTENSIONS=1
+export FROZENLIST_NO_EXTENSIONS=1
+
+info "Installing requirements..."
+$WINE_PYTHON -m pip install --no-build-isolation --no-dependencies --no-binary :all: --no-warn-script-location \
     --cache-dir "$WINE_PIP_CACHE_DIR" -r "$CONTRIB"/deterministic-build/requirements.txt
-
-$WINE_PYTHON -m pip install --no-dependencies --no-warn-script-location \
+info "Installing dependencies specific to binaries..."
+# TODO use "--no-binary :all:" (but we don't have a C compiler...)
+$WINE_PYTHON -m pip install --no-build-isolation --no-dependencies --no-warn-script-location \
     --cache-dir "$WINE_PIP_CACHE_DIR" -r "$CONTRIB"/deterministic-build/requirements-binaries.txt
-
-$WINE_PYTHON -m pip install --no-dependencies --no-warn-script-location \
+info "Installing hardware wallet requirements..."
+# TODO use "--no-binary :all:" (but we don't have a C compiler...)
+$WINE_PYTHON -m pip install --no-build-isolation --no-dependencies --no-warn-script-location \
     --cache-dir "$WINE_PIP_CACHE_DIR" -r "$CONTRIB"/deterministic-build/requirements-hw.txt
 
 pushd $WINEPREFIX/drive_c/electrum-doi
@@ -56,11 +61,11 @@ rm -rf dist/
 
 # build standalone and portable versions
 info "Running pyinstaller..."
-wine "$WINE_PYHOME/scripts/pyinstaller.exe" --noconfirm --ascii --clean --name $NAME_ROOT-$VERSION -w deterministic.spec
+ELECTRUM_CMDLINE_NAME="$NAME_ROOT-$VERSION" wine "$WINE_PYHOME/scripts/pyinstaller.exe" --noconfirm --ascii --clean -w deterministic.spec
 
 # set timestamps in dist, in order to make the installer reproducible
 pushd dist
-find -exec touch -d '2000-11-11T11:11:11+00:00' {} +
+find -exec touch -h -d '2000-11-11T11:11:11+00:00' {} +
 popd
 
 info "building NSIS installer"
