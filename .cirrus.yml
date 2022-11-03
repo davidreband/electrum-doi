@@ -33,9 +33,6 @@ task:
     folder: ~/.cache/pip
     fingerprint_script: echo $ELECTRUM_IMAGE && cat $ELECTRUM_REQUIREMENTS_CI && cat $ELECTRUM_REQUIREMENTS
     populate_script: mkdir -p ~/.cache/pip
-  electrum_cache:
-    folder: /tmp/electrum-build
-    populate_script: mkdir -p /tmp/electrum-build
   version_script:
     - $ELECTRUM_PYTHON_NAME --version
   tag_script:
@@ -70,9 +67,6 @@ task:
     folder: ~/.cache/pip
     fingerprint_script: echo Locale && echo $ELECTRUM_IMAGE && cat $ELECTRUM_REQUIREMENTS_CI
     populate_script: mkdir -p ~/.cache/pip
-  electrum_cache:
-    folder: /tmp/electrum-build
-    populate_script: mkdir -p /tmp/electrum-build
   install_script:
     - apt-get update
     - apt-get -y install gettext
@@ -101,9 +95,6 @@ task:
     folder: ~/.cache/pip
     fingerprint_script: echo Regtest && echo docker_builder && cat $ELECTRUM_REQUIREMENTS
     populate_script: mkdir -p ~/.cache/pip
-  electrum_cache:
-    folder: /tmp/electrum-build
-    populate_script: mkdir -p /tmp/electrum-build
   bitcoind_cache:
     folder: /tmp/bitcoind
     populate_script: mkdir -p /tmp/bitcoind
@@ -140,9 +131,6 @@ task:
     folder: ~/.cache/pip
     fingerprint_script: echo Flake8 && echo $ELECTRUM_IMAGE && cat $ELECTRUM_REQUIREMENTS
     populate_script: mkdir -p ~/.cache/pip
-  electrum_cache:
-    folder: /tmp/electrum-build
-    populate_script: mkdir -p /tmp/electrum-build
   install_script:
     - pip install flake8
   flake8_script:
