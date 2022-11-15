@@ -349,7 +349,6 @@ def main():
 
 
     if config_options.get('portable'):
-        print_msg("_________________aaaaaaaaaa")
         if is_local:
             # running from git clone or local source: put datadir next to main script
             datadir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'electrum_data')

@@ -1,4 +1,4 @@
-# Electrum - Lightweight Bitcoin client
+# Electrum-DOI - Lightweight Doichain client
 
 ```
 Licence: MIT Licence

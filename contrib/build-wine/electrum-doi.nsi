@@ -132,11 +132,9 @@ Section
   CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\${PRODUCT_NAME} Testnet.lnk" "$INSTDIR\electrum-${PRODUCT_VERSION}.exe" "--testnet" "$INSTDIR\electrum-${PRODUCT_VERSION}.exe" 0
 
 
-<<<<<<< HEAD:contrib/build-wine/electrum-doi.nsi
+
   ;Links bitcoin: URI's to Electrum-DOI
-=======
-  ;Links bitcoin: and lightning: URIs to Electrum
->>>>>>> 47c480be499d97ebac8611be744ea2015bb59f70:contrib/build-wine/electrum.nsi
+
   WriteRegStr HKCU "Software\Classes\bitcoin" "" "URL:bitcoin Protocol"
   WriteRegStr HKCU "Software\Classes\bitcoin" "URL Protocol" ""
   WriteRegStr HKCU "Software\Classes\bitcoin" "DefaultIcon" "$\"$INSTDIR\electrum.ico, 0$\""

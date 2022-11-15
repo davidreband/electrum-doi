@@ -617,13 +617,8 @@ class Interface(Logger):
         self.logger.info(f'requesting block header {height} in mode {assert_mode}')
         # use lower timeout as we usually have network.bhi_lock here
         timeout = self.network.get_network_timeout_seconds(NetworkTimeout.Urgent)
-        cp_height = constants.net.max_checkpoint()
-        if height > cp_height:
-            cp_height = 0
-        res = await self.session.send_request('blockchain.block.header', [height, cp_height], timeout=timeout)
-        if cp_height != 0:
-            res = res["header"]
-        return blockchain.deserialize_header(bytes.fromhex(res), height)
+        res = await self.session.send_request('blockchain.block.header', [height], timeout=timeout)
+        return blockchain.deserialize_full_header(bytes.fromhex(res), height)
 
     async def request_chunk(self, height: int, tip=None, *, can_return_early=False):
         if not is_non_negative_integer(height):
@@ -752,7 +747,7 @@ class Interface(Logger):
             item = await header_queue.get()
             raw_header = item[0]
             height = raw_header['height']
-            header = blockchain.deserialize_header(bfh(raw_header['hex']), height)
+            header = blockchain.deserialize_full_header(bfh(raw_header['hex']), height)
             self.tip_header = header
             self.tip = height
             if self.tip < constants.net.max_checkpoint():
@@ -860,8 +855,8 @@ class Interface(Logger):
 
         mock = 'mock' in bad_header and bad_header['mock']['connect'](height)
         real = not mock and self.blockchain.can_connect(bad_header, check_height=False)
-        #if not real and not mock:
-         #   raise Exception('unexpected bad header during binary: {}'.format(bad_header))
+        if not real and not mock:
+            raise Exception('unexpected bad header during binary: {}'.format(bad_header))
         _assert_header_does_not_check_against_any_chain(bad_header)
 
         self.logger.info(f"binary search exited. good {good}, bad {bad}")

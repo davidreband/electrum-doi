@@ -1,4 +1,4 @@
-# Electrum - lightweight Bitcoin client
+# Electrum-DOI - lightweight Doichain client
 # Copyright (C) 2011 Thomas Voegtlin
 #
 # Permission is hereby granted, free of charge, to any person
@@ -82,18 +82,18 @@ def all_subclasses(cls) -> Set:
 ca_path = certifi.where()
 
 
-base_units = {'BTC':8, 'mBTC':5, 'bits':2, 'sat':0}
+base_units = {'DOI':8, 'mDOI':5, 'bits':2, 'swartz':0}
 base_units_inverse = inv_dict(base_units)
-base_units_list = ['BTC', 'mBTC', 'bits', 'sat']  # list(dict) does not guarantee order
+base_units_list = ['DOI', 'mDOI', 'bits', 'swartz']  # list(dict) does not guarantee order
 
-DECIMAL_POINT_DEFAULT = 5  # mBTC
+DECIMAL_POINT_DEFAULT = 5  # mDOI
 
 
 class UnknownBaseUnit(Exception): pass
 
 
 def decimal_point_to_base_unit_name(dp: int) -> str:
-    # e.g. 8 -> "BTC"
+    # e.g. 8 -> "DOI"
     try:
         return base_units_inverse[dp]
     except KeyError:
@@ -101,7 +101,7 @@ def decimal_point_to_base_unit_name(dp: int) -> str:
 
 
 def base_unit_name_to_decimal_point(unit_name: str) -> int:
-    # e.g. "BTC" -> 8
+    # e.g. "DOI" -> 8
     try:
         return base_units[unit_name]
     except KeyError:
@@ -605,11 +605,11 @@ def user_dir():
     elif 'ANDROID_DATA' in os.environ:
         return android_data_dir()
     elif os.name == 'posix':
-        return os.path.join(os.environ["HOME"], ".electrum")
+        return os.path.join(os.environ["HOME"], ".electrum-doi")
     elif "APPDATA" in os.environ:
-        return os.path.join(os.environ["APPDATA"], "Electrum")
+        return os.path.join(os.environ["APPDATA"], "Electrum-DOI")
     elif "LOCALAPPDATA" in os.environ:
-        return os.path.join(os.environ["LOCALAPPDATA"], "Electrum")
+        return os.path.join(os.environ["LOCALAPPDATA"], "Electrum-DOI")
     else:
         #raise Exception("No home directory found in environment variables.")
         return
@@ -832,14 +832,14 @@ mainnet_block_explorers = {
                         {'tx': 'tx/', 'addr': 'address/'}),
     'blockchainbdgpzk.onion': ('https://blockchainbdgpzk.onion/',
                         {'tx': 'tx/', 'addr': 'address/'}),
-    'Blockstream.info': ('https://blockstream.info/',
+    'Blockstream.info': ('https://explorer.doichain.org',
                         {'tx': 'tx/', 'addr': 'address/'}),
     'Bitaps.com': ('https://btc.bitaps.com/',
                         {'tx': '', 'addr': ''}),
-    'BTC.com': ('https://btc.com/',
+    'DOI.com': ('https://btc.com/',
                         {'tx': '', 'addr': ''}),
     'Chain.so': ('https://www.chain.so/',
-                        {'tx': 'tx/BTC/', 'addr': 'address/BTC/'}),
+                        {'tx': 'tx/DOI/', 'addr': 'address/DOI/'}),
     'Insight.is': ('https://insight.bitpay.com/',
                         {'tx': 'tx/', 'addr': 'address/'}),
     'TradeBlock.com': ('https://tradeblock.com/blockchain/',
@@ -907,7 +907,7 @@ def block_explorer_info():
 
 
 def block_explorer(config: 'SimpleConfig') -> Optional[str]:
-    """Returns name of selected block explorer,
+    """Returns name of selected Doichain explorer,
     or None if a custom one (not among hardcoded ones) is configured.
     """
     if config.get('block_explorer_custom') is not None:
@@ -932,7 +932,7 @@ def block_explorer_tuple(config: 'SimpleConfig') -> Optional[Tuple[str, dict]]:
                         f"expected a str or a pair but got {custom_be!r}")
         return None
     else:
-        # using one of the hardcoded block explorers
+        # using one of the hardcoded Doichain explorers
         return block_explorer_info().get(block_explorer(config))
 
 
@@ -974,12 +974,12 @@ def parse_URI(uri: str, on_pr: Callable = None, *, loop=None) -> dict:
 
     if ':' not in uri:
         if not bitcoin.is_address(uri):
-            raise InvalidBitcoinURI("Not a bitcoin address")
+            raise InvalidBitcoinURI("Not a Doichain address")
         return {'address': uri}
 
     u = urllib.parse.urlparse(uri)
     if u.scheme.lower() != BITCOIN_BIP21_URI_SCHEME:
-        raise InvalidBitcoinURI("Not a bitcoin URI")
+        raise InvalidBitcoinURI("Not a Doichain URI")
     address = u.path
 
     # python for android fails to parse query
@@ -996,7 +996,7 @@ def parse_URI(uri: str, on_pr: Callable = None, *, loop=None) -> dict:
     out = {k: v[0] for k, v in pq.items()}
     if address:
         if not bitcoin.is_address(address):
-            raise InvalidBitcoinURI(f"Invalid bitcoin address: {address}")
+            raise InvalidBitcoinURI(f"Invalid Doichain address: {address}")
         out['address'] = address
     if 'amount' in out:
         am = out['amount']
@@ -1008,7 +1008,7 @@ def parse_URI(uri: str, on_pr: Callable = None, *, loop=None) -> dict:
             else:
                 amount = Decimal(am) * COIN
             if amount > TOTAL_COIN_SUPPLY_LIMIT_IN_BTC * COIN:
-                raise InvalidBitcoinURI(f"amount is out-of-bounds: {amount!r} BTC")
+                raise InvalidBitcoinURI(f"amount is out-of-bounds: {amount!r} DOI")
             out['amount'] = int(amount)
         except Exception as e:
             raise InvalidBitcoinURI(f"failed to parse 'amount' field: {repr(e)}") from e
