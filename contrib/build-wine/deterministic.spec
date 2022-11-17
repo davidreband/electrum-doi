@@ -2,12 +2,10 @@
 
 from PyInstaller.utils.hooks import collect_data_files, collect_submodules, collect_dynamic_libs
 
-import sys
-for i, x in enumerate(sys.argv):
-    if x == '--name':
-        cmdline_name = sys.argv[i+1]
-        break
-else:
+import sys, os
+
+cmdline_name = os.environ.get("ELECTRUM_CMDLINE_NAME")
+if not cmdline_name:
     raise Exception('no name')
 
 home = 'C:\\electrum-doi\\'
@@ -22,6 +20,8 @@ hiddenimports += collect_submodules('keepkeylib')
 hiddenimports += collect_submodules('websocket')
 hiddenimports += collect_submodules('ckcc')
 hiddenimports += collect_submodules('bitbox02')
+hiddenimports += ['electrum.plugins.jade.jade']
+hiddenimports += ['electrum.plugins.jade.jadepy.jade']
 hiddenimports += ['PyQt5.QtPrintSupport']  # needed by Revealer
 
 
@@ -38,6 +38,7 @@ datas = [
     (home+'electrum/*.json', 'electrum'),
     (home+'electrum/lnwire/*.csv', 'electrum/lnwire'),
     (home+'electrum/wordlist/english.txt', 'electrum/wordlist'),
+    (home+'electrum/wordlist/slip39.txt', 'electrum/wordlist'),
     (home+'electrum/locale', 'electrum/locale'),
     (home+'electrum/plugins', 'electrum/plugins'),
     (home+'electrum/gui/icons', 'electrum/gui/icons'),
@@ -52,6 +53,7 @@ datas += collect_data_files('bitbox02')
 # We don't put these files in to actually include them in the script but to make the Analysis method scan them for imports
 a = Analysis([home+'run_electrum',
               home+'electrum/gui/qt/main_window.py',
+              home+'electrum/gui/qt/qrreader/qtmultimedia/camera_dialog.py',
               home+'electrum/gui/text.py',
               home+'electrum/util.py',
               home+'electrum/wallet.py',
@@ -60,13 +62,13 @@ a = Analysis([home+'run_electrum',
               home+'electrum/dnssec.py',
               home+'electrum/commands.py',
               home+'electrum/plugins/cosigner_pool/qt.py',
-              home+'electrum/plugins/email_requests/qt.py',
               home+'electrum/plugins/trezor/qt.py',
               home+'electrum/plugins/safe_t/client.py',
               home+'electrum/plugins/safe_t/qt.py',
               home+'electrum/plugins/keepkey/qt.py',
               home+'electrum/plugins/ledger/qt.py',
               home+'electrum/plugins/coldcard/qt.py',
+              home+'electrum/plugins/jade/qt.py',
               #home+'packages/requests/utils.py'
               ],
              binaries=binaries,
@@ -100,6 +102,14 @@ for x in a.datas.copy():
             a.datas.remove(x)
             print('----> Removed x =', x)
 
+# not reproducible (see #7739):
+print("Removing *.dist-info/ from datas:")
+for x in a.datas.copy():
+    if ".dist-info\\" in x[0].lower():
+        a.datas.remove(x)
+        print('----> Removed x =', x)
+
+
 # hotfix for #3171 (pre-Win10 binaries)
 a.binaries = [x for x in a.binaries if not x[1].lower().startswith(r'c:\windows')]
 
@@ -114,7 +124,7 @@ exe_standalone = EXE(
     a.scripts,
     a.binaries,
     a.datas,
-    name=os.path.join('build\\pyi.win32\\electrum-doi', cmdline_name + ".exe"),
+    name=os.path.join('build\\pyi.win32\\electrum', cmdline_name + ".exe"),
     debug=False,
     strip=None,
     upx=False,
@@ -127,7 +137,7 @@ exe_portable = EXE(
     a.scripts,
     a.binaries,
     a.datas + [('is_portable', 'README.md', 'DATA')],
-    name=os.path.join('build\\pyi.win32\\electrum-doi', cmdline_name + "-portable.exe"),
+    name=os.path.join('build\\pyi.win32\\electrum', cmdline_name + "-portable.exe"),
     debug=False,
     strip=None,
     upx=False,
@@ -141,7 +151,7 @@ exe_inside_setup_noconsole = EXE(
     pyz,
     a.scripts,
     exclude_binaries=True,
-    name=os.path.join('build\\pyi.win32\\electrum-doi', cmdline_name),
+    name=os.path.join('build\\pyi.win32\\electrum', cmdline_name),
     debug=False,
     strip=None,
     upx=False,
@@ -152,7 +162,7 @@ exe_inside_setup_console = EXE(
     pyz,
     a.scripts,
     exclude_binaries=True,
-    name=os.path.join('build\\pyi.win32\\electrum-doi', cmdline_name+"-debug"),
+    name=os.path.join('build\\pyi.win32\\electrum', cmdline_name+"-debug"),
     debug=False,
     strip=None,
     upx=False,

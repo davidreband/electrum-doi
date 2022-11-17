@@ -6,36 +6,10 @@
 
 set -e
 
-here="$(dirname "$(readlink -e "$0")")"
-test -n "$here" -a -d "$here" || exit
-
-if [ -z "$WIN_ARCH" ] ; then
-    export WIN_ARCH="win32"  # default
-fi
-if [ "$WIN_ARCH" = "win32" ] ; then
-    export GCC_TRIPLET_HOST="i686-w64-mingw32"
-elif [ "$WIN_ARCH" = "win64" ] ; then
-    export GCC_TRIPLET_HOST="x86_64-w64-mingw32"
-else
-    echo "unexpected WIN_ARCH: $WIN_ARCH"
-    exit 1
-fi
-
-export BUILD_TYPE="wine"
-export GCC_TRIPLET_BUILD="x86_64-pc-linux-gnu"
-export GCC_STRIP_BINARIES="1"
-
-export CONTRIB="$here/.."
-export PROJECT_ROOT="$CONTRIB/.."
-export CACHEDIR="$here/.cache/$WIN_ARCH"
-export PIP_CACHE_DIR="$CACHEDIR/wine_pip_cache"
-export WINE_PIP_CACHE_DIR="c:/electrum-doi/contrib/build-wine/.cache/$WIN_ARCH/wine_pip_cache"
-export DLL_TARGET_DIR="$CACHEDIR/dlls"
-
-export WINEPREFIX="/opt/wine64"
-export WINEDEBUG=-all
-export WINE_PYHOME="c:/python3"
-export WINE_PYTHON="wine $WINE_PYHOME/python.exe -OO -B"
+PROJECT_ROOT="$(dirname "$(readlink -e "$0")")/../.."
+PROJECT_ROOT_OR_FRESHCLONE_ROOT="$PROJECT_ROOT"
+CONTRIB="$PROJECT_ROOT/contrib"
+CONTRIB_WINE="$CONTRIB/build-wine"
 
 . "$CONTRIB"/build_tools_util.sh
 
