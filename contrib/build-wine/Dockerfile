@@ -29,6 +29,8 @@ RUN dpkg --add-architecture i386 && \
         autopoint \
         libtool \
         gettext \
+        sudo \
+        nsis \
         && \
     rm -rf /var/lib/apt/lists/* && \
     apt-get autoremove -y && \
