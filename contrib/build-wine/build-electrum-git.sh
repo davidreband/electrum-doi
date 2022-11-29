@@ -18,15 +18,13 @@ info "Last commit: $VERSION"
 # Load electrum-locale for this release
 git submodule update --init
 
-LOCALE="$WINEPREFIX/drive_c/electrum/electrum/locale/"
+LOCALE="$WINEPREFIX/drive_c/electrum-doi/electrum/locale/"
 # we want the binary to have only compiled (.mo) locale files; not source (.po) files
-rm -rf "$WINEPREFIX/drive_c/electrum-doi/electrum/locale/"
-for i in ./locale/*; do
-    dir="$WINEPREFIX/drive_c/electrum-doi/electrum/$i/LC_MESSAGES"
-    mkdir -p $dir
-    msgfmt --output-file="$dir/electrum.mo" "$i/electrum.po" || true
-done
-popd
+
+rm -rf "$LOCALE"
+"$CONTRIB/build_locale.sh" "$CONTRIB/deterministic-build/electrum-locale/locale/" "$LOCALE"
+
+
 
 find -exec touch -h -d '2000-11-11T11:11:11+00:00' {} +
 popd
@@ -70,7 +68,7 @@ popd
 
 info "building NSIS installer"
 # $VERSION could be passed to the electrum.nsi script, but this would require some rewriting in the script itself.
-wine "$WINEPREFIX/drive_c/Program Files (x86)/NSIS/makensis.exe" /DPRODUCT_VERSION=$VERSION electrum-doi.nsi
+makensis -DPRODUCT_VERSION=$VERSION electrum.nsi
 
 cd dist
 mv electrum-setup.exe $NAME_ROOT-$VERSION-setup.exe

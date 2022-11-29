@@ -25,7 +25,7 @@ export CONTRIB="$here/.."
 export PROJECT_ROOT="$CONTRIB/.."
 export CACHEDIR="$here/.cache/$WIN_ARCH/build"
 export PIP_CACHE_DIR="$here/.cache/$WIN_ARCH/wine_pip_cache"
-export WINE_PIP_CACHE_DIR="c:/electrum/contrib/build-wine/.cache/$WIN_ARCH/wine_pip_cache"
+export WINE_PIP_CACHE_DIR="c:/electrum-doi/contrib/build-wine/.cache/$WIN_ARCH/wine_pip_cache"
 export DLL_TARGET_DIR="$CACHEDIR/dlls"
 
 export WINEPREFIX="/opt/wine64"
@@ -77,11 +77,11 @@ else
     "$CONTRIB"/make_zbar.sh || fail "Could not build zbar"
 fi
 
-if [ -f "$DLL_TARGET_DIR/libusb-1.0.dll" ]; then
-    info "libusb already built, skipping"
-else
-    "$CONTRIB"/make_libusb.sh || fail "Could not build libusb"
-fi
+#if [ -f "$DLL_TARGET_DIR/libusb-1.0.dll" ]; then
+#    info "libusb already built, skipping"
+#else
+#    "$CONTRIB"/make_libusb.sh || fail "Could not build libusb"
+#fi
 
 "$here/prepare-wine.sh" || fail "prepare-wine failed"
 
