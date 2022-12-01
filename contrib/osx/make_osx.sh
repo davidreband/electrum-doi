@@ -258,8 +258,5 @@ DoCodeSignMaybe ".DMG" "dist/electrum-${VERSION}.dmg"
 if [ -z "$CODESIGN_CERT" ]; then
     warn "App was built successfully but was not code signed. Users may get security warnings from macOS."
     warn "Specify a valid code signing identity to enable code signing."
-<<<<<<< HEAD
+
 fi
-=======
-fi
->>>>>>> 47c480be499d97ebac8611be744ea2015bb59f70

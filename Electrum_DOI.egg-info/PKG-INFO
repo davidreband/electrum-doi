@@ -1,17 +1,20 @@
 Metadata-Version: 2.1
 Name: Electrum-DOI
-Version: 4.1.4
+Version: 4.3.2
 Summary: Lightweight Doichain Wallet (AuxPoW fork)
 Home-page: https://www.namecoin.org/
 Author: The Namecoin developers; based on Electrum by Thomas Voegtlin and Electrum-DOGE by The Electrum-DOGE contributors
 Author-email: jeremy@namecoin.org
 License: GNU GPLv3+ for Electrum-DOGE components; MIT Licence for all other components
-Description: Lightweight Doichain Wallet (AuxPoW fork)
-Platform: UNKNOWN
-Requires-Python: >=3.6.1
+Requires-Python: >=3.8.0
 Provides-Extra: hardware
 Provides-Extra: gui
 Provides-Extra: crypto
 Provides-Extra: tests
 Provides-Extra: full
 Provides-Extra: fast
+License-File: LICENCE
+License-File: LICENCE.DOGE
+License-File: AUTHORS
+
+Lightweight Doichain Wallet (AuxPoW fork)

@@ -118,9 +118,9 @@ fi
 
 
 # windows
-win1="electrum-$REV.exe"
-win2="electrum-$REV-portable.exe"
-win3="electrum-$REV-setup.exe"
+win1="electrum-doi-$REV.exe"
+win2="electrum-doi-$REV-portable.exe"
+win3="electrum-doi-$REV-setup.exe"
 if test -f "dist/$win1"; then
     info "file exists: $win1"
 else
@@ -130,7 +130,7 @@ else
         mkdir -p $FRESH_CLONE && \
         cd $FRESH_CLONE  && \
         git clone https://github.com/davidreband/electrum-doi.git && \
-        cd electrum
+        cd electrum-doi
     git checkout "${COMMIT}^{commit}"
     sudo docker run -it \
         --name electrum-wine-builder-cont \
