@@ -80,7 +80,7 @@ ${genisoimage} \
     -D \
     -l \
     -probe \
-    -V "Electrum" \
+    -V "Electrum-DOI" \
     -no-pad \
     -r \
     -dir-mode 0755 \

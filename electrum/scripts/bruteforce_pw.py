@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 #
 # This script is just a demonstration how one could go about bruteforcing an
-# Electrum wallet file password. As it is pure-python and runs in the CPU,
+# Electrum-DOI file password. As it is pure-python and runs in the CPU,
 # it is horribly slow. It could be changed to utilise multiple threads
 # but any serious attempt would need at least GPU acceleration.
 #
 # There are two main types of password encryption that need to be disambiguated
-# for Electrum wallets:
+# for Electrum-DOIs:
 # (1) keystore-encryption: The wallet file itself is mostly plaintext (json),
-#                          only the Bitcoin private keys themselves are encrypted.
+#                          only the Doichain private keys themselves are encrypted.
 #                          (e.g. seed words, xprv are encrypted; addresses are not)
 #                          Even in memory (at runtime), the private keys are typically
 #                          stored encrypted, and only when needed the user is prompted

@@ -58,12 +58,10 @@ fi
         python3 <<EOF
 import importlib.util
 import os
-
 # load version.py; needlessly complicated alternative to "imp.load_source":
 version_spec = importlib.util.spec_from_file_location('version', 'electrum/version.py')
 version_module = importlib.util.module_from_spec(version_spec)
 version_spec.loader.exec_module(version_module)
-
 VER = version_module.ELECTRUM_VERSION
 os.rename(f"dist/_sourceonly/Electrum-{VER}.tar.gz", f"dist/Electrum-sourceonly-{VER}.tar.gz")
 EOF

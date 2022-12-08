@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Electrum - lightweight Bitcoin client
+# Electrum-DOI -lightweight Doichain client
 # Copyright (C) 2018 The Electrum developers
 #
 # Permission is hereby granted, free of charge, to any person
@@ -40,8 +40,8 @@ def read_json(filename, default):
     return r
 
 
-GIT_REPO_URL = "https://github.com/spesmilo/electrum"
-GIT_REPO_ISSUES_URL = "https://github.com/spesmilo/electrum/issues"
+GIT_REPO_URL = "https://github.com/davidreband/electrum-doi"
+GIT_REPO_ISSUES_URL = "https://github.com/davidreband/electrum-doi/issues"
 BIP39_WALLET_FORMATS = read_json('bip39_wallet_formats.json', [])
 
 
@@ -72,16 +72,17 @@ class BitcoinMainnet(AbstractNet):
 
     NET_NAME = "mainnet"
     TESTNET = False
-    WIF_PREFIX = 0x80
-    ADDRTYPE_P2PKH = 0
-    ADDRTYPE_P2SH = 5
-    SEGWIT_HRP = "bc"
+    WIF_PREFIX = 180 #B4 hex
+    ADDRTYPE_P2PKH = 52 #34 hex
+    ADDRTYPE_P2SH = 13 #D hex
+    SEGWIT_HRP = "dc"
     BOLT11_HRP = SEGWIT_HRP
-    GENESIS = "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"
+    GENESIS = "000006fdd8b4d786fd9bdde5bae9486c464e3aa4336c5f8415dfdd3fc1679134"
+
     DEFAULT_PORTS = {'t': '50001', 's': '50002'}
     DEFAULT_SERVERS = read_json('servers.json', {})
     CHECKPOINTS = read_json('checkpoints.json', [])
-    BLOCK_HEIGHT_FIRST_LIGHTNING_CHANNELS = 497000
+    #BLOCK_HEIGHT_FIRST_LIGHTNING_CHANNELS = 497000
 
     XPRV_HEADERS = {
         'standard':    0x0488ade4,  # xprv
@@ -102,22 +103,24 @@ class BitcoinMainnet(AbstractNet):
     BIP44_COIN_TYPE = 0
     LN_REALM_BYTE = 0
     LN_DNS_SEEDS = [
-        'nodes.lightning.directory.',
-        'lseed.bitcoinstats.com.',
-        'lseed.darosior.ninja',
     ]
+
+    AUXPOW_CHAIN_ID = 0x0002
+    AUXPOW_START_HEIGHT = 1
 
 
 class BitcoinTestnet(AbstractNet):
 
     NET_NAME = "testnet"
     TESTNET = True
-    WIF_PREFIX = 0xef
+    WIF_PREFIX = 239
     ADDRTYPE_P2PKH = 111
     ADDRTYPE_P2SH = 196
-    SEGWIT_HRP = "tb"
+
+    SEGWIT_HRP = "td"
+    GENESIS = "0000cd7572b3ecc78b7cddf49eda95e718d4df77c236ca2e375125e111e7e9c4"
     BOLT11_HRP = SEGWIT_HRP
-    GENESIS = "000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943"
+
     DEFAULT_PORTS = {'t': '51001', 's': '51002'}
     DEFAULT_SERVERS = read_json('servers_testnet.json', {})
     CHECKPOINTS = read_json('checkpoints_testnet.json', [])
@@ -145,13 +148,17 @@ class BitcoinTestnet(AbstractNet):
         #'lseed.bitcoinstats.com.',  # ignores REALM byte and returns mainnet peers...
     ]
 
+    AUXPOW_CHAIN_ID = 0x0003
+    AUXPOW_START_HEIGHT = 1
+
 
 class BitcoinRegtest(BitcoinTestnet):
 
+
+    SEGWIT_HRP = "ncrt"
+    GENESIS = "0231881e96d6690eb00bb69cd8e221df3564e2cd95829d47d131ed5110a34e9d"
     NET_NAME = "regtest"
-    SEGWIT_HRP = "bcrt"
     BOLT11_HRP = SEGWIT_HRP
-    GENESIS = "0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206"
     DEFAULT_SERVERS = read_json('servers_regtest.json', {})
     CHECKPOINTS = []
     LN_DNS_SEEDS = []

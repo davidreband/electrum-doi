@@ -24,8 +24,8 @@ from .logging import Logger
 
 
 DEFAULT_ENABLED = False
-DEFAULT_CURRENCY = "EUR"
-DEFAULT_EXCHANGE = "CoinGecko"  # default exchange should ideally provide historical rates
+DEFAULT_CURRENCY = "USD"
+DEFAULT_EXCHANGE = "CoinPaprika"  # default exchange should ideally provide historical rates
 
 
 # See https://en.wikipedia.org/wiki/ISO_4217
@@ -346,10 +346,11 @@ class CoinDesk(ExchangeBase):
         return json['bpi']
 
 
-class CoinGecko(ExchangeBase):
+class CoinPaprika(ExchangeBase):
 
     async def get_rates(self, ccy):
-        json = await self.get_json('api.coingecko.com', '/api/v3/exchange_rates')
+
+        json = await self.get_json('api.coinpaprika.com','/v1/coins/doi-doicoin/ohlcv/latest?quote=usd')
         return dict([(ccy.upper(), to_decimal(d['value']))
                      for ccy, d in json['rates'].items()])
 
@@ -358,8 +359,19 @@ class CoinGecko(ExchangeBase):
         return CURRENCIES[self.name()]
 
     async def request_history(self, ccy):
-        history = await self.get_json('api.coingecko.com',
-                                      '/api/v3/coins/bitcoin/market_chart?vs_currency=%s&days=max' % ccy)
+        today = datetime.today().strftime("%Y-%m-%d")
+
+        historicRate = ''
+        time_close = ''
+        history = {}
+
+        res = await self.get_json('api.coinpaprika.com', f'/v1/coins/doi-doicoin/ohlcv/historical?start=2021-03-18&end={today}&quote=usd')
+        for pair in res:
+            for key in pair.keys():
+                if key =='close': historicRate = pair[key]
+                if key =='time_close': time_close = pair[key]
+            history[time_close.split("T")[0]] = historicRate
+
 
         return dict([(datetime.utcfromtimestamp(h[0]/1000).strftime('%Y-%m-%d'), str(h[1]))
                      for h in history['prices']])
@@ -653,6 +665,7 @@ class FxThread(ThreadJob, EventListener):
         """Returns the exchange rate as a Decimal"""
         if not self.is_enabled():
             return Decimal('NaN')
+
         return self.exchange.get_cached_spot_quote(self.ccy)
 
     def format_amount(self, btc_balance, *, timestamp: int = None) -> str:
@@ -691,8 +704,10 @@ class FxThread(ThreadJob, EventListener):
         rate = self.exchange.historical_rate(self.ccy, d_t)
         # Frequently there is no rate for today, until tomorrow :)
         # Use spot quotes in that case
+
         if rate.is_nan() and (datetime.today().date() - d_t.date()).days <= 2:
             rate = self.exchange.get_cached_spot_quote(self.ccy)
+
             self.history_used_spot = True
         if rate is None:
             rate = 'NaN'

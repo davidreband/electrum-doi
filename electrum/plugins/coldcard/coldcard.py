@@ -337,7 +337,7 @@ class Coldcard_KeyStore(Hardware_KeyStore):
             assert len(resp) == 2
             addr, raw_sig = resp
 
-            # already encoded in Bitcoin fashion, binary.
+            # already encoded in Doichain fashion, binary.
             assert 40 < len(raw_sig) <= 65
 
             return raw_sig

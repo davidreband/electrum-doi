@@ -1,5 +1,5 @@
-# Electrum - lightweight Bitcoin client
-# Copyright (C) 2018 The Electrum Developers
+# Electrum-DOI -lightweight Doichain client
+# Copyright (C) 2018 The Electrum-DOI Developers
 #
 # Permission is hereby granted, free of charge, to any person
 # obtaining a copy of this software and associated documentation files
@@ -817,7 +817,7 @@ class AddressSynchronizer(Logger, EventListener):
     @with_local_height_cached
     def get_balance(self, domain, *, excluded_addresses: Set[str] = None,
                     excluded_coins: Set[str] = None) -> Tuple[int, int, int]:
-        """Return the balance of a set of addresses:
+        """Return the balance of a Doichain address:
         confirmed and matured, unconfirmed, unmatured
         """
         if excluded_addresses is None:

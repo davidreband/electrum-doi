@@ -25,7 +25,13 @@ the source-only one, also includes:
 
     (set envvar `OMIT_UNCLEAN_FILES=1` to build the "source-only" tarball)
     ```
-    $ ./build.sh
+    $ FRESH_CLONE=contrib/build-linux/sdist/fresh_clone && \
+        sudo rm -rf $FRESH_CLONE && \
+        umask 0022 && \
+        mkdir -p $FRESH_CLONE && \
+        cd $FRESH_CLONE  && \
+        git clone https://github.com/Doichain/electrum-doi.git && \
+        cd electrum
     ```
     If you want reproducibility, try instead e.g.:
     ```

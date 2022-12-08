@@ -32,7 +32,6 @@ from . import FAST_TESTS
 def needs_test_with_all_aes_implementations(func):
     """Function decorator to run a unit test multiple times:
     once with each AES implementation.
-
     NOTE: this is inherently sequential;
     tests running in parallel would break things
     """
@@ -63,7 +62,6 @@ def needs_test_with_all_aes_implementations(func):
 def needs_test_with_all_chacha20_implementations(func):
     """Function decorator to run a unit test multiple times:
     once with each ChaCha20/Poly1305 implementation.
-
     NOTE: this is inherently sequential;
     tests running in parallel would break things
     """

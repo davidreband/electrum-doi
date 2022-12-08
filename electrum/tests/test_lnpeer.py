@@ -1568,4 +1568,6 @@ class TestPeer(TestCaseForTestnet):
 
 
 def run(coro):
+
     return asyncio.run_coroutine_threadsafe(coro, loop=util.get_asyncio_loop()).result()
+

@@ -21,7 +21,7 @@ If you request a force-close, your node will pretend that it has lost its data a
 MSG_CREATED_NON_RECOVERABLE_CHANNEL = """
 The channel you created is not recoverable from seed.
 To prevent fund losses, please save this backup on another device.
-It may be imported in another Electrum wallet with the same seed.
+It may be imported in another Electrum-DOI with the same seed.
 """
 
 MSG_LIGHTNING_EXPERIMENTAL_WARNING = """

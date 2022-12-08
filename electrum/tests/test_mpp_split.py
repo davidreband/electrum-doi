@@ -133,4 +133,5 @@ class TestMppSplit(ElectrumTestCase):
         with self.subTest(msg="exclude all single channel splits"):
             mpp_split.PART_PENALTY = 0.3
             splits = mpp_split.suggest_splits(1_000_000_000, channels_with_funds, exclude_single_channel_splits=True)
+
             self.assertEqual(1, len(splits[0].config[(0, 0)]))

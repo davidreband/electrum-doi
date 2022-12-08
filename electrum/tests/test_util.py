@@ -18,7 +18,7 @@ class TestUtil(ElectrumTestCase):
     def test_format_satoshis_negative(self):
         self.assertEqual("-0.00001234", format_satoshis(-1234))
 
-    def test_format_satoshis_to_mbtc(self):
+    def test_format_satoshis_to_mDOI(self):
         self.assertEqual("0.01234", format_satoshis(1234, decimal_point=5))
 
     def test_format_satoshis_decimal(self):
@@ -97,7 +97,7 @@ class TestUtil(ElectrumTestCase):
     def test_format_satoshis_plain_decimal(self):
         self.assertEqual("0.00001234", format_satoshis_plain(Decimal(1234)))
 
-    def test_format_satoshis_plain_to_mbtc(self):
+    def test_format_satoshis_plain_to_mDOI(self):
         self.assertEqual("0.01234", format_satoshis_plain(1234, decimal_point=5))
 
     def _do_test_parse_URI(self, uri, expected):

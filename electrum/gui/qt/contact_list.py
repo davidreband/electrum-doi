@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Electrum - lightweight Bitcoin client
+# Electrum-DOI -lightweight Doichain client
 # Copyright (C) 2015 Thomas Voegtlin
 #
 # Permission is hereby granted, free of charge, to any person
@@ -94,7 +94,7 @@ class ContactList(MyTreeView):
             menu.addAction(_("Delete"), lambda: self.parent.delete_contacts(selected_keys))
             URLs = [block_explorer_URL(self.config, 'addr', key) for key in filter(is_address, selected_keys)]
             if URLs:
-                menu.addAction(_("View on block explorer"), lambda: [webopen(u) for u in URLs])
+                menu.addAction(_("View on Doichain Explorer"), lambda: [webopen(u) for u in URLs])
 
         run_hook('create_contact_menu', menu, selected_keys)
         menu.exec_(self.viewport().mapToGlobal(position))

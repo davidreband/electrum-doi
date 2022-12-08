@@ -1,4 +1,4 @@
-# Electrum - lightweight Bitcoin client
+# Electrum-DOI -lightweight Doichain client
 # Copyright (C) 2015 Thomas Voegtlin
 #
 # Permission is hereby granted, free of charge, to any person
@@ -547,7 +547,7 @@ class Abstract_Wallet(ABC, Logger, EventListener):
             addr = str(addrs[0])
             if not bitcoin.is_address(addr):
                 neutered_addr = addr[:5] + '..' + addr[-2:]
-                raise WalletFileException(f'The addresses in this wallet are not bitcoin addresses.\n'
+                raise WalletFileException(f'The addresses in this wallet are not Doichain addresses.\n'
                                           f'e.g. {neutered_addr} (length: {len(addr)})')
 
     def check_returned_address_for_corruption(func):
@@ -690,7 +690,7 @@ class Abstract_Wallet(ABC, Logger, EventListener):
         if self.is_watching_only():
             raise Exception(_("This is a watching-only wallet"))
         if not is_address(address):
-            raise Exception(f"Invalid bitcoin address: {address}")
+            raise Exception(f"Invalid Doichain address: {address}")
         if not self.is_mine(address):
             raise Exception(_('Address not in wallet.') + f' {address}')
         index = self.get_address_index(address)
@@ -1517,7 +1517,7 @@ class Abstract_Wallet(ABC, Logger, EventListener):
                 addrs = self.get_change_addresses(slice_start=-self.gap_limit_for_change)
                 change_addrs = [random.choice(addrs)] if addrs else []
         for addr in change_addrs:
-            assert is_address(addr), f"not valid bitcoin address: {addr}"
+            assert is_address(addr), f"not valid Doichain address: {addr}"
             # note that change addresses are not necessarily ismine
             # in which case this is a no-op
             self.check_address_for_corruption(addr)
@@ -1548,7 +1548,7 @@ class Abstract_Wallet(ABC, Logger, EventListener):
                 selected_addr = random.choice(addrs)
             else:  # fallback for e.g. imported wallets
                 selected_addr = self.get_receiving_address()
-        assert is_address(selected_addr), f"not valid bitcoin address: {selected_addr}"
+        assert is_address(selected_addr), f"not valid Doichain address: {selected_addr}"
         return selected_addr
 
     def can_pay_onchain(self, outputs, coins=None):
@@ -1572,7 +1572,7 @@ class Abstract_Wallet(ABC, Logger, EventListener):
             rbf=False) -> PartialTransaction:
         """Can raise NotEnoughFunds or NoDynamicFeeEstimates."""
 
-        if not coins:  # any bitcoin tx must have at least 1 input by consensus
+        if not coins:  # any Doichain tx must have at least 1 input by consensus
             raise NotEnoughFunds()
         if any([c.already_has_some_signatures() for c in coins]):
             raise Exception("Some inputs already contain signatures!")
@@ -1863,7 +1863,6 @@ class Abstract_Wallet(ABC, Logger, EventListener):
             coins: Sequence[PartialTxInput] = None,
     ) -> PartialTransaction:
         """Increase the miner fee of 'tx'.
-
         - keeps all inputs
         - keeps all not is_mine outputs,
         - allows adding new inputs
@@ -1921,7 +1920,6 @@ class Abstract_Wallet(ABC, Logger, EventListener):
             new_fee_rate: Union[int, Decimal],
     ) -> PartialTransaction:
         """Increase the miner fee of 'tx'.
-
         - keeps all inputs
         - no new inputs are added
         - allows decreasing and removing outputs (change is decreased first)
@@ -1978,7 +1976,6 @@ class Abstract_Wallet(ABC, Logger, EventListener):
             new_fee_rate: Union[int, Decimal],
     ) -> PartialTransaction:
         """Increase the miner fee of 'tx'.
-
         - keeps all inputs
         - no new inputs are added
         - decreases payment outputs (not change!). Each non-ismine output is decreased
@@ -2580,7 +2577,6 @@ class Abstract_Wallet(ABC, Logger, EventListener):
 
     def get_available_storage_encryption_version(self) -> StorageEncryptionVersion:
         """Returns the type of storage encryption offered to the user.
-
         A wallet file (storage) is either encrypted with this version
         or is stored in plaintext.
         """
@@ -2591,7 +2587,6 @@ class Abstract_Wallet(ABC, Logger, EventListener):
 
     def has_keystore_encryption(self) -> bool:
         """Returns whether encryption is enabled for the keystore.
-
         If True, e.g. signing a transaction will require a password.
         """
         if self.can_have_keystore_encryption():
@@ -2655,7 +2650,7 @@ class Abstract_Wallet(ABC, Logger, EventListener):
         pass
 
     def price_at_timestamp(self, txid, price_func):
-        """Returns fiat price of bitcoin at the time tx got confirmed."""
+        """Returns fiat price of Doichain at the time tx got confirmed."""
         timestamp = self.adb.get_tx_height(txid).timestamp
         return price_func(timestamp if timestamp else time.time())
 
@@ -2754,7 +2749,6 @@ class Abstract_Wallet(ABC, Logger, EventListener):
     def get_warning_for_risk_of_burning_coins_as_fees(self, tx: 'PartialTransaction') -> Optional[str]:
         """Returns a warning message if there is risk of burning coins as fees if we sign.
         Note that if not all inputs are ismine, e.g. coinjoin, the risk is not just about fees.
-
         Note:
             - legacy sighash does not commit to any input amounts
             - BIP-0143 sighash only commits to the *corresponding* input amount
@@ -3567,8 +3561,8 @@ def restore_wallet_from_text(text, *, path: Optional[str], config: SimpleConfig,
                              passphrase=None, password=None, encrypt_file=True,
                              gap_limit=None) -> dict:
     """Restore a wallet from text. Text can be a seed phrase, a master
-    public key, a master private key, a list of bitcoin addresses
-    or bitcoin private keys."""
+    public key, a master private key, a list of Doichain addresses
+    or Doichain private keys."""
     if path is None:  # create wallet in-memory
         storage = None
     else:

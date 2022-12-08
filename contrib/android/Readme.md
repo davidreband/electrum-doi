@@ -19,7 +19,13 @@ similar system.
 
     The build script takes a few arguments. To see syntax, run it without providing any:
     ```
-    $ ./build.sh
+    $ FRESH_CLONE=contrib/android/fresh_clone && \
+        sudo rm -rf $FRESH_CLONE && \
+        umask 0022 && \
+        mkdir -p $FRESH_CLONE && \
+        cd $FRESH_CLONE  && \
+        git clone https://github.com/Doichain/electrum-doi.git && \
+        cd electrum-doi
     ```
     For development, consider e.g. `$ ./build.sh kivy arm64-v8a debug`
 

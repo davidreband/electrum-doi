@@ -8,7 +8,7 @@ cmdline_name = os.environ.get("ELECTRUM_CMDLINE_NAME")
 if not cmdline_name:
     raise Exception('no name')
 
-home = 'C:\\electrum\\'
+home = 'C:\\electrum-doi\\'
 
 # see https://github.com/pyinstaller/pyinstaller/issues/2005
 hiddenimports = []
@@ -32,7 +32,7 @@ binaries = []
 binaries += [b for b in collect_dynamic_libs('PyQt5') if 'qwindowsvista' in b[0]]
 
 binaries += [('C:/tmp/libsecp256k1-0.dll', '.')]
-binaries += [('C:/tmp/libusb-1.0.dll', '.')]
+#binaries += [('C:/tmp/libusb-1.0.dll', '.')]
 binaries += [('C:/tmp/libzbar-0.dll', '.')]
 
 datas = [
@@ -125,7 +125,7 @@ exe_standalone = EXE(
     a.scripts,
     a.binaries,
     a.datas,
-    name=os.path.join('build\\pyi.win32\\electrum', cmdline_name + ".exe"),
+    name=os.path.join('build\\pyi.win32\\electrum-doi', cmdline_name + ".exe"),
     debug=False,
     strip=None,
     upx=False,
@@ -138,7 +138,7 @@ exe_portable = EXE(
     a.scripts,
     a.binaries,
     a.datas + [('is_portable', 'README.md', 'DATA')],
-    name=os.path.join('build\\pyi.win32\\electrum', cmdline_name + "-portable.exe"),
+    name=os.path.join('build\\pyi.win32\\electrum-doi', cmdline_name + "-portable.exe"),
     debug=False,
     strip=None,
     upx=False,
@@ -152,7 +152,7 @@ exe_inside_setup_noconsole = EXE(
     pyz,
     a.scripts,
     exclude_binaries=True,
-    name=os.path.join('build\\pyi.win32\\electrum', cmdline_name),
+    name=os.path.join('build\\pyi.win32\\electrum-doi', cmdline_name),
     debug=False,
     strip=None,
     upx=False,
@@ -163,7 +163,7 @@ exe_inside_setup_console = EXE(
     pyz,
     a.scripts,
     exclude_binaries=True,
-    name=os.path.join('build\\pyi.win32\\electrum', cmdline_name+"-debug"),
+    name=os.path.join('build\\pyi.win32\\electrum-doi', cmdline_name+"-debug"),
     debug=False,
     strip=None,
     upx=False,
@@ -181,4 +181,4 @@ coll = COLLECT(
     debug=False,
     icon=home+'electrum/gui/icons/electrum.ico',
     console=False,
-    name=os.path.join('dist', 'electrum'))
+    name=os.path.join('dist', 'electrum-doi'))

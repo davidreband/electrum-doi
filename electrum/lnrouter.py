@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Electrum - lightweight Bitcoin client
+# Electrum-DOI -lightweight Doichain client
 # Copyright (C) 2018 The Electrum developers
 #
 # Permission is hereby granted, free of charge, to any person
@@ -343,7 +343,7 @@ class LiquidityHintMgr:
 
     def penalty(self, node_from: bytes, node_to: bytes, channel_id: ShortChannelID, amount: int) -> float:
         """Gives a penalty when sending from node1 to node2 over channel_id with an
-        amount in units of millisatoshi.
+        amount in units of milliswartz.
 
         The penalty depends on the can_send and cannot_send values that was
         possibly recorded in previous payment attempts.

@@ -289,8 +289,8 @@ class LnAddr(object):
         if value.is_nan() or not (0 <= value <= TOTAL_COIN_SUPPLY_LIMIT_IN_BTC):
             raise LnInvoiceException(f"amount is out-of-bounds: {value!r} BTC")
         if value * 10**12 % 10:
-            # max resolution is millisatoshi
-            raise LnInvoiceException(f"Cannot encode {value!r}: too many decimal places")
+            # max resolution is milliswartz
+            raise ValueError(f"Cannot encode {value!r}: too many decimal places")
         self._amount = value
 
     def get_amount_sat(self) -> Optional[Decimal]:

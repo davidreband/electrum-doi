@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Electrum - lightweight Bitcoin client
+# Electrum-DOI -lightweight Doichain client
 # Copyright (C) 2018 The Electrum developers
 #
 # Permission is hereby granted, free of charge, to any person
@@ -34,7 +34,8 @@ from . import ecc
 from . import constants
 from .util import bh2u, bfh, NetworkJobOnDefaultServer
 from .lnutil import funding_output_script_from_keys, ShortChannelID
-from .verifier import verify_tx_is_in_block, MerkleVerificationFailure
+from .verifier import verify_tx_is_in_block
+from .merkle import MerkleVerificationFailure
 from .transaction import Transaction
 from .interface import GracefulDisconnect
 from .crypto import sha256d

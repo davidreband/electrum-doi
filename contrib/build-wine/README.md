@@ -20,11 +20,12 @@ similar system.
     $ ./build.sh
     ```
     If you want reproducibility, try instead e.g.:
+
     ```
     $ ELECBUILD_COMMIT=HEAD ELECBUILD_NOCACHE=1 ./build.sh
     ```
 
-3. The generated binaries are in `./contrib/build-wine/dist`.
+4. The generated binaries are in `./contrib/build-wine/dist`.
 
 
 
@@ -33,7 +34,7 @@ similar system.
 Electrum Windows builds are signed with a Microsoft Authenticode™ code signing
 certificate in addition to the GPG-based signatures.
 
-The advantage of using Authenticode is that Electrum users won't receive a 
+The advantage of using Authenticode is that Electrum users won't receive a
 Windows SmartScreen warning when starting it.
 
 The release signing procedure involves a signer (the holder of the
@@ -57,7 +58,7 @@ certificate/key) and one or multiple trusted verifiers:
 
 ## Verify Integrity of signed binary
 
-Every user can verify that the official binary was created from the source code in this 
+Every user can verify that the official binary was created from the source code in this
 repository. To do so, the Authenticode signature needs to be stripped since the signature
 is not reproducible.
 

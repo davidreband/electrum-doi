@@ -206,7 +206,7 @@
      - consider inflight HTLCs and try to route around them (#7292)
    - bugfix: add more safety checks to avoid "batch RBF" feature
      merging LN funding txs (#7298)
-   - remove HTLC value upper limit of ~42 mBTC (#7328)
+   - remove HTLC value upper limit of ~42 mDOI (#7328)
    - Kivy GUI: implement freezing LN channels (11bb39ee)
  * imported wallets: when enabling the "Use change addresses" option,
    change will now be sent to a random unused imported address. (#7330)
@@ -352,7 +352,7 @@ below are user-visible.
    3.0, using BIP-0173 (bech32) addresses. BIP-0350 makes a breaking
    change in address encoding, and recommends using a new encoding
    (bech32m) for sending to witness version 1 and later.
- * Block explorer: allow setting a custom URL in Qt GUI (#6965)
+ * Doichain Explorer: allow setting a custom URL in Qt GUI (#6965)
 
 
 # Release 4.0.9 - (Dec 18, 2020)
@@ -1569,7 +1569,7 @@ issue #3374. Users should upgrade to 3.0.5.
 
 # Release 1.9.6
 * During wallet creation, do not write seed to disk until it is encrypted.
-* Confirmation dialog if the transaction fee is higher than 1mBTC.
+* Confirmation dialog if the transaction fee is higher than 1mDOI.
 * bugfixes
 
 # Release 1.9.5
@@ -1631,7 +1631,7 @@ bugfixes: connection problems, transactions staying unverified
 
 # Release 1.7.3:
 
-* Classic GUI can display amounts in mBTC
+* Classic GUI can display amounts in mDOI
 * Account selector in the classic GUI
 * Changed the way the portable flag uses without supplying a -w argument
 * Classic GUI asks users to enter their seed on wallet creation

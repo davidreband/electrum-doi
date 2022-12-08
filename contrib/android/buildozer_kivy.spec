@@ -1,10 +1,10 @@
 [app]
 
 # (str) Title of your application
-title = Electrum
+title = Electrum-DOI
 
 # (str) Package name
-package.name = Electrum
+package.name = electrum-doi
 
 # (str) Package domain (needed for android/ios packaging)
 package.domain = org.electrum

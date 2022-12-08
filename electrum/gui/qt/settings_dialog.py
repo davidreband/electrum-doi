@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Electrum - lightweight Bitcoin client
+# Electrum-DOI -lightweight Doichain client
 # Copyright (C) 2012 thomasv@gitorious
 #
 # Permission is hereby granted, free of charge, to any person
@@ -222,7 +222,7 @@ class SettingsDialog(QDialog, QtEventListener):
         # units
         units = base_units_list
         msg = (_('Base unit of your wallet.')
-               + '\n1 BTC = 1000 mBTC. 1 mBTC = 1000 bits. 1 bit = 100 sat.\n'
+               + '\n1 DOI = 1000 mDOI. 1 mDOI = 1000 bits. 1 bit = 100 sat.\n'
                + _('This setting affects the Send tab, and all balance related fields.'))
         unit_label = HelpLabel(_('Base unit') + ':', msg)
         unit_combo = QComboBox()
@@ -357,7 +357,7 @@ class SettingsDialog(QDialog, QtEventListener):
         outrounding_cb.setToolTip(
             _('Set the value of the change output so that it has similar precision to the other outputs.') + '\n' +
             _('This might improve your privacy somewhat.') + '\n' +
-            _('If enabled, at most 100 satoshis might be lost due to this, per transaction.'))
+            _('If enabled, at most 100 swartzs might be lost due to this, per transaction.'))
         outrounding_cb.setChecked(enable_outrounding)
         outrounding_cb.stateChanged.connect(on_outrounding)
 
@@ -366,8 +366,8 @@ class SettingsDialog(QDialog, QtEventListener):
         if BLOCK_EX_CUSTOM_ITEM in block_explorers:  # malicious translation?
             block_explorers.remove(BLOCK_EX_CUSTOM_ITEM)
         block_explorers.append(BLOCK_EX_CUSTOM_ITEM)
-        msg = _('Choose which online block explorer to use for functions that open a web browser')
-        block_ex_label = HelpLabel(_('Online Block Explorer') + ':', msg)
+        msg = _('Choose which online Doichain Explorer to use for functions that open a web browser')
+        block_ex_label = HelpLabel(_('Online Doichain Explorer') + ':', msg)
         block_ex_combo = QComboBox()
         block_ex_custom_e = QLineEdit(str(self.config.get('block_explorer_custom') or ''))
         block_ex_combo.addItems(block_explorers)

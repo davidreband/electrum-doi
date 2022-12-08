@@ -1,4 +1,4 @@
-# Electrum - Lightweight Bitcoin Client
+# Electrum - Lightweight Doichain Client
 # Copyright (c) 2011-2016 Thomas Voegtlin
 #
 # Permission is hereby granted, free of charge, to any person
@@ -925,7 +925,27 @@ class Network(Logger, NetworkRetryManager[ServerAddr]):
         # server_msg is untrusted input so it should not be shown to the user. see #4968
         server_msg = str(server_msg)
         server_msg = server_msg.replace("\n", r"\n")
-
+        # https://github.com/bitcoin/bitcoin/blob/5bb64acd9d3ced6e6f95df282a1a0f8b98522cb0/src/policy/policy.cpp
+        # grep "reason ="
+        policy_error_messages = {
+            r"version": _("Transaction uses non-standard version."),
+            r"tx-size": _("The transaction was rejected because it is too large (in bytes)."),
+            r"scriptsig-size": None,
+            r"scriptsig-not-pushonly": None,
+            r"scriptpubkey":
+                ("scriptpubkey\n" +
+                 _("Some of the outputs pay to a non-standard script.")),
+            r"bare-multisig": None,
+            r"dust":
+                (_("Transaction could not be broadcast due to dust outputs.\n"
+                   "Some of the outputs are too small in value, probably lower than 1000 swartzs.\n"
+                   "Check the units, make sure you haven't confused e.g. mDOI and DOI.")),
+            r"multi-op-return": _("The transaction was rejected because it contains multiple OP_RETURN outputs."),
+        }
+        for substring in policy_error_messages:
+            if substring in server_msg:
+                msg = policy_error_messages[substring]
+                return msg if msg else substring
         # https://github.com/bitcoin/bitcoin/blob/5bb64acd9d3ced6e6f95df282a1a0f8b98522cb0/src/script/script_error.cpp
         script_error_messages = {
             r"Script evaluated without error but finished with a false/empty top stack element",
@@ -1001,7 +1021,7 @@ class Network(Logger, NetworkRetryManager[ServerAddr]):
             r"bad-txns-too-many-sigops": None,
             r"mempool min fee not met":
                 ("mempool min fee not met\n" +
-                 _("Your transaction is paying a fee that is so low that the bitcoin node cannot "
+                 _("Your transaction is paying a fee that is so low that the Doichain node cannot "
                    "fit it into its mempool. The mempool is already full of hundreds of megabytes "
                    "of transactions that all pay higher fees. Try to increase the fee.")),
             r"min relay fee not met": None,

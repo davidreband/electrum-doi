@@ -3,7 +3,7 @@
 from electrum.bitcoin import hash_encode
 from electrum.transaction import Transaction
 from electrum.util import bfh
-from electrum.verifier import SPV, InnerNodeOfSpvProofIsValidTx
+from electrum.merkle import hash_merkle_root, InnerNodeOfSpvProofIsValidTx
 
 from . import TestCaseForTestnet
 
@@ -27,7 +27,7 @@ class VerifierTestCase(TestCaseForTestnet):
         """Actually mined 64 byte tx should not raise."""
         t_tx = Transaction(VALID_64_BYTE_TX)
         t_tx_hash = t_tx.txid()
-        self.assertEqual(MERKLE_ROOT, SPV.hash_merkle_root(MERKLE_BRANCH, t_tx_hash, 3))
+        self.assertEqual(MERKLE_ROOT, hash_merkle_root(MERKLE_BRANCH, t_tx_hash, 3))
 
     def test_verify_fail_f_tx_odd(self):
         """Raise if inner node of merkle branch is valid tx. ('odd' fake leaf position)"""
@@ -37,7 +37,7 @@ class VerifierTestCase(TestCaseForTestnet):
         # last 32 bytes of T encoded as hash
         f_tx_hash = hash_encode(bfh(VALID_64_BYTE_TX[64:]))
         with self.assertRaises(InnerNodeOfSpvProofIsValidTx):
-            SPV.hash_merkle_root(fake_mbranch, f_tx_hash, 7)
+            hash_merkle_root(fake_mbranch, f_tx_hash, 7)
 
     def test_verify_fail_f_tx_even(self):
         """Raise if inner node of merkle branch is valid tx. ('even' fake leaf position)"""
@@ -47,4 +47,4 @@ class VerifierTestCase(TestCaseForTestnet):
         # first 32 bytes of T encoded as hash
         f_tx_hash = hash_encode(bfh(VALID_64_BYTE_TX[:64]))
         with self.assertRaises(InnerNodeOfSpvProofIsValidTx):
-            SPV.hash_merkle_root(fake_mbranch, f_tx_hash, 6)
+            hash_merkle_root(fake_mbranch, f_tx_hash, 6)

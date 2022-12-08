@@ -117,14 +117,14 @@ class Invoice(StoredObject):
                 status_str = _('Expires') + ' ' + age(expiration, include_seconds=True)
         return status_str
 
+
     def get_address(self) -> Optional[str]:
         """returns the first address, to be displayed in GUI"""
-        address = None
-        if self.outputs:
-            address = self.outputs[0].address if len(self.outputs) > 0 else None
-        if not address and self.is_lightning():
-            address = self._lnaddr.get_fallback_address() or None
-        return address
+        if self.is_lightning():
+            return self._lnaddr.get_fallback_address() or None
+
+        else:
+            return self.outputs[0].address
 
     def get_outputs(self):
         if self.is_lightning():
@@ -138,11 +138,6 @@ class Invoice(StoredObject):
             outputs = self.outputs
         return outputs
 
-    def can_be_paid_onchain(self) -> bool:
-        if self.is_lightning():
-            return bool(self._lnaddr.get_fallback_address())
-        else:
-            return True
 
     def get_expiration_date(self):
         # 0 means never

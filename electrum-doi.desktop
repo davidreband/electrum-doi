@@ -1,17 +1,17 @@
-# If you want Electrum to appear in a Linux app launcher ("start menu"), install this by doing:
-# sudo desktop-file-install electrum.desktop
+# If you want Electrum-DOI to appear in a Linux app launcher ("start menu"), install this by doing:
+# sudo desktop-file-install electrum-doi.desktop
 
 [Desktop Entry]
-Comment=Lightweight Bitcoin Client
+Comment=Lightweight Doichain Client
 Exec=sh -c "PATH=\"\\$HOME/.local/bin:\\$PATH\"; electrum %u"
-GenericName[en_US]=Bitcoin Wallet
-GenericName=Bitcoin Wallet
+GenericName[en_US]=Doichain Wallet
+GenericName=Electrum-DOI
 Icon=electrum
-Name[en_US]=Electrum Bitcoin Wallet
-Name=Electrum Bitcoin Wallet
+Name[en_US]=Electrum-DOI Doichain Wallet
+Name=Electrum-DOI Doichain Wallet
 Categories=Finance;Network;
 StartupNotify=true
-StartupWMClass=electrum
+StartupWMClass=electrum-doi
 Terminal=false
 Type=Application
 MimeType=x-scheme-handler/bitcoin;x-scheme-handler/lightning;

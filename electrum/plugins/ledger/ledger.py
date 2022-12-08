@@ -485,12 +485,14 @@ class Ledger_Client_Legacy(Ledger_Client):
 
     @runs_in_hwd_thread
     def checkDevice(self):
-        firmwareInfo = self.dongleObject.getFirmwareVersion()
-        firmware = firmwareInfo['version']
-        self.multiOutputSupported = versiontuple(firmware) >= versiontuple(MULTI_OUTPUT_SUPPORT)
-        self.nativeSegwitSupported = versiontuple(firmware) >= versiontuple(SEGWIT_SUPPORT)
-        self.segwitSupported = self.nativeSegwitSupported or (firmwareInfo['specialVersion'] == 0x20 and versiontuple(firmware) >= versiontuple(SEGWIT_SUPPORT_SPECIAL))
-        self.segwitTrustedInputs = versiontuple(firmware) >= versiontuple(SEGWIT_TRUSTEDINPUTS)
+        if not self.preflightDone:
+            try:
+                self.perform_hw1_preflight()
+            except BTChipException as e:
+                if (e.sw == 0x6d00 or e.sw == 0x6700):
+                    raise UserFacingException(_("Device not in Doichain mode")) from e
+                raise e
+            self.preflightDone = True
 
     def password_dialog(self, msg=None):
         response = self.handler.get_word(msg)

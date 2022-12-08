@@ -1,6 +1,6 @@
 #!/bin/bash
 
-NAME_ROOT=electrum
+NAME_ROOT=electrum-doi
 
 export PYTHONDONTWRITEBYTECODE=1  # don't create __pycache__/ folders with .pyc files
 
@@ -10,7 +10,7 @@ set -e
 
 . "$CONTRIB"/build_tools_util.sh
 
-pushd $WINEPREFIX/drive_c/electrum
+pushd $WINEPREFIX/drive_c/electrum-doi
 
 VERSION=$(git describe --tags --dirty --always)
 info "Last commit: $VERSION"
@@ -18,10 +18,13 @@ info "Last commit: $VERSION"
 # Load electrum-locale for this release
 git submodule update --init
 
-LOCALE="$WINEPREFIX/drive_c/electrum/electrum/locale/"
+LOCALE="$WINEPREFIX/drive_c/electrum-doi/electrum/locale/"
 # we want the binary to have only compiled (.mo) locale files; not source (.po) files
+
 rm -rf "$LOCALE"
 "$CONTRIB/build_locale.sh" "$CONTRIB/deterministic-build/electrum-locale/locale/" "$LOCALE"
+
+
 
 find -exec touch -h -d '2000-11-11T11:11:11+00:00' {} +
 popd
@@ -45,10 +48,10 @@ info "Installing hardware wallet requirements..."
 $WINE_PYTHON -m pip install --no-build-isolation --no-dependencies --no-warn-script-location \
     --cache-dir "$WINE_PIP_CACHE_DIR" -r "$CONTRIB"/deterministic-build/requirements-hw.txt
 
-pushd $WINEPREFIX/drive_c/electrum
+pushd $WINEPREFIX/drive_c/electrum-doi
 # see https://github.com/pypa/pip/issues/2195 -- pip makes a copy of the entire directory
-info "Pip installing Electrum. This might take a long time if the project folder is large."
-$WINE_PYTHON -m pip install --no-build-isolation --no-dependencies --no-warn-script-location .
+info "Pip installing Electrum-DOI. This might take a long time if the project folder is large."
+$WINE_PYTHON -m pip install --no-dependencies --no-warn-script-location .
 popd
 
 

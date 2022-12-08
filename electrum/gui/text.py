@@ -543,9 +543,13 @@ class ElectrumGui(BaseElectrumGui, EventListener):
         self.str_fee = ''
         self.str_description = ''
 
-    def do_create_request(self):
-        amount_sat = self.parse_amount(self.str_recv_amount)
-        if not amount_sat:
+    def do_send(self):
+        if not is_address(self.str_recipient):
+            self.show_message(_('Invalid Doichain address'))
+            return
+        try:
+            amount = int(Decimal(self.str_amount) * COIN)
+        except Exception:
             self.show_message(_('Invalid Amount'))
             return
         if amount_sat < self.wallet.dust_threshold():

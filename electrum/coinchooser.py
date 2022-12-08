@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Electrum - lightweight Bitcoin client
+# Electrum-DOI -lightweight Doichain client
 # Copyright (C) 2015 kyuupichan@gmail
 #
 # Permission is hereby granted, free of charge, to any person
@@ -74,8 +74,8 @@ class PRNG:
 class Bucket(NamedTuple):
     desc: str
     weight: int                   # as in BIP-141
-    value: int                    # in satoshis
-    effective_value: int          # estimate of value left after subtracting fees. in satoshis
+    value: int                    # in swartzs
+    effective_value: int          # estimate of value left after subtracting fees. in swartzs
     coins: List[PartialTxInput]   # UTXOs
     min_height: int               # min block height where a coin was confirmed
     witness: bool                 # whether any coin uses segwit
@@ -156,7 +156,7 @@ class CoinChooserBase(Logger):
     def _change_amounts(self, tx: PartialTransaction, count: int, fee_estimator_numchange) -> List[int]:
         # Break change up if bigger than max_change
         output_amounts = [o.value for o in tx.outputs()]
-        # Don't split change of less than 0.02 BTC
+        # Don't split change of less than 0.02 DOI
         max_change = max(max(output_amounts) * 1.25, 0.02 * COIN)
 
         # Use N change outputs
@@ -197,7 +197,7 @@ class CoinChooserBase(Logger):
 
         # Last change output.  Round down to maximum precision but lose
         # no more than 10**max_dp_to_round_for_privacy
-        # e.g. a max of 2 decimal places means losing 100 satoshis to fees
+        # e.g. a max of 2 decimal places means losing 100 swartzs to fees
         max_dp_to_round_for_privacy = 2 if self.enable_output_value_rounding else 0
         N = int(pow(10, min(max_dp_to_round_for_privacy, zeroes[0])))
         amount = (remaining // N) * N
@@ -307,7 +307,7 @@ class CoinChooserBase(Logger):
             total_input = input_value + bucket_value_sum
             if total_input < spent_amount:  # shortcut for performance
                 return False
-            # any bitcoin tx must have at least 1 input by consensus
+            # any Doichain tx must have at least 1 input by consensus
             # (check we add some new UTXOs now or already have some fixed inputs)
             if not buckets and not inputs:
                 return False
@@ -464,12 +464,12 @@ class CoinChooserPrivacy(CoinChooserRandom):
                 pass  # no change is great!
             elif change < min_change:
                 badness += (min_change - change) / (min_change + 10000)
-                # Penalize really small change; under 1 mBTC ~= using 1 more input
+                # Penalize really small change; under 1 mDOI ~= using 1 more input
                 if change < COIN / 1000:
                     badness += 1
             elif change > max_change:
                 badness += (change - max_change) / (max_change + 10000)
-                # Penalize large change; 5 BTC excess ~= using 1 more input
+                # Penalize large change; 5 DOI excess ~= using 1 more input
                 badness += change / (COIN * 5)
             return ScoredCandidate(badness, tx, buckets)
 
@@ -489,7 +489,7 @@ def get_name(config):
 def get_coin_chooser(config) -> CoinChooserBase:
     klass = COIN_CHOOSERS[get_name(config)]
     # note: we enable enable_output_value_rounding by default as
-    #       - for sacrificing a few satoshis
+    #       - for sacrificing a few swartzs
     #       + it gives better privacy for the user re change output
     #       + it also helps the network as a whole as fees will become noisier
     #         (trying to counter the heuristic that "whole integer sat/byte feerates" are common)

@@ -91,11 +91,13 @@ fi
 set -x
 
 # create tarball
-tarball="Electrum-$VERSION.tar.gz"
+
+tarball="Electrum-DOI-$VERSION.tar.gz"
 if test -f "dist/$tarball"; then
     info "file exists: $tarball"
 else
     ./contrib/build-linux/sdist/build.sh
+
 fi
 
 # create source-only tarball
@@ -116,18 +118,28 @@ fi
 
 
 # windows
-win1="electrum-$REV.exe"
-win2="electrum-$REV-portable.exe"
-win3="electrum-$REV-setup.exe"
+win1="electrum-doi-$REV.exe"
+win2="electrum-doi-$REV-portable.exe"
+win3="electrum-doi-$REV-setup.exe"
 if test -f "dist/$win1"; then
     info "file exists: $win1"
 else
     pushd .
-    if test -f "contrib/build-wine/dist/$win1"; then
-        info "unsigned file exists: $win1"
-    else
-        ./contrib/build-wine/build.sh
-    fi
+    FRESH_CLONE=contrib/build-wine/fresh_clone && \
+        sudo rm -rf $FRESH_CLONE && \
+        mkdir -p $FRESH_CLONE && \
+        cd $FRESH_CLONE  && \
+        git clone https://github.com/davidreband/electrum-doi.git && \
+        cd electrum-doi
+    git checkout "${COMMIT}^{commit}"
+    sudo docker run -it \
+        --name electrum-wine-builder-cont \
+        -v $PWD:/opt/wine64/drive_c/electrum-doi \
+        --rm \
+        --workdir /opt/wine64/drive_c/electrum-doi/contrib/build-wine \
+        electrum-wine-builder-img \
+        ./build.sh
+    # do this in the fresh clone directory!
     cd contrib/build-wine/
     if [ ! -z "$RELEASEMANAGER" ] ; then
         ./sign.sh
@@ -139,10 +151,11 @@ else
 fi
 
 # android
-apk1="Electrum-$VERSION.0-armeabi-v7a-release.apk"
-apk1_unsigned="Electrum-$VERSION.0-armeabi-v7a-release-unsigned.apk"
-apk2="Electrum-$VERSION.0-arm64-v8a-release.apk"
-apk2_unsigned="Electrum-$VERSION.0-arm64-v8a-release-unsigned.apk"
+
+apk1="Electrum-DOI-$VERSION.0-armeabi-v7a-release.apk"
+apk1_unsigned="Electrum-DOI-$VERSION.0-armeabi-v7a-release-unsigned.apk"
+apk2="Electrum-DOI-$VERSION.0-arm64-v8a-release.apk"
+apk2_unsigned="Electrum-DOI-$VERSION.0-arm64-v8a-release-unsigned.apk"
 if test -f "dist/$apk1"; then
     info "file exists: $apk1"
 else
@@ -153,6 +166,7 @@ else
         mv "dist/$apk1_unsigned" "dist/$apk1"
         mv "dist/$apk2_unsigned" "dist/$apk2"
     fi
+
 fi
 
 # the macos binary is built on a separate machine.

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #
-# Electrum - lightweight Bitcoin client
-# Copyright (C) 2020 The Electrum Developers
+# Electrum-DOI -lightweight Doichain client
+# Copyright (C) 2020 The Electrum-DOI Developers
 #
 # Permission is hereby granted, free of charge, to any person
 # obtaining a copy of this software and associated documentation files

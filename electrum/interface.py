@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Electrum - lightweight Bitcoin client
+# Electrum-DOI -lightweight Doichain client
 # Copyright (C) 2011 thomasv@gitorious
 #
 # Permission is hereby granted, free of charge, to any person
@@ -68,7 +68,11 @@ ca_path = certifi.where()
 
 BUCKET_NAME_OF_ONION_SERVERS = 'onion'
 
-MAX_INCOMING_MSG_SIZE = 1_000_000  # in bytes
+# The default Doichain frame size limit of 1 MB doesn't work for AuxPoW-based
+# chains, because those chains' block headers have extra AuxPoW data.  A limit
+# of 10 MB works fine for Namecoin as of block height 418744 (5 MB fails after
+# height 155232); we set a limit of 20 MB so that we have extra wiggle room.
+MAX_INCOMING_MSG_SIZE = 20_000_000  # in bytes
 
 _KNOWN_NETWORK_PROTOCOLS = {'t', 's'}
 PREFERRED_NETWORK_PROTOCOL = 's'
@@ -614,7 +618,7 @@ class Interface(Logger):
         # use lower timeout as we usually have network.bhi_lock here
         timeout = self.network.get_network_timeout_seconds(NetworkTimeout.Urgent)
         res = await self.session.send_request('blockchain.block.header', [height], timeout=timeout)
-        return blockchain.deserialize_header(bytes.fromhex(res), height)
+        return blockchain.deserialize_full_header(bytes.fromhex(res), height)
 
     async def request_chunk(self, height: int, tip=None, *, can_return_early=False):
         if not is_non_negative_integer(height):
@@ -628,18 +632,21 @@ class Interface(Logger):
             size = min(size, tip - index * 2016 + 1)
             size = max(size, 0)
         try:
+            cp_height = constants.net.max_checkpoint()
+            if index * 2016 + size - 1 > cp_height:
+                cp_height = 0
             self._requested_chunks.add(index)
-            res = await self.session.send_request('blockchain.block.headers', [index * 2016, size])
+            res = await self.session.send_request('blockchain.block.headers', [index * 2016, size, cp_height])
         finally:
             self._requested_chunks.discard(index)
-        assert_dict_contains_field(res, field_name='count')
-        assert_dict_contains_field(res, field_name='hex')
-        assert_dict_contains_field(res, field_name='max')
-        assert_non_negative_integer(res['count'])
-        assert_non_negative_integer(res['max'])
-        assert_hex_str(res['hex'])
-        if len(res['hex']) != HEADER_SIZE * 2 * res['count']:
-            raise RequestCorrupted('inconsistent chunk hex and count')
+        # assert_dict_contains_field(res, field_name='count')
+        # assert_dict_contains_field(res, field_name='hex')
+        # assert_dict_contains_field(res, field_name='max')
+        # assert_non_negative_integer(res['count'])
+        # assert_non_negative_integer(res['max'])
+        # assert_hex_str(res['hex'])
+        # if len(res['hex']) != HEADER_SIZE * 2 * res['count']:
+        #     raise RequestCorrupted('inconsistent chunk hex and count')
         # we never request more than 2016 headers, but we enforce those fit in a single response
         if res['max'] < 2016:
             raise RequestCorrupted(f"server uses too low 'max' count for block.headers: {res['max']} < 2016")
@@ -740,7 +747,7 @@ class Interface(Logger):
             item = await header_queue.get()
             raw_header = item[0]
             height = raw_header['height']
-            header = blockchain.deserialize_header(bfh(raw_header['hex']), height)
+            header = blockchain.deserialize_full_header(bfh(raw_header['hex']), height)
             self.tip_header = header
             self.tip = height
             if self.tip < constants.net.max_checkpoint():
@@ -1093,7 +1100,7 @@ class Interface(Logger):
             return ''
         if not bitcoin.is_address(res):
             # note: do not hard-fail -- allow server to use future-type
-            #       bitcoin address we do not recognize
+            #       Doichain address we do not recognize
             self.logger.info(f"invalid donation address from server: {repr(res)}")
             res = ''
         return res
