@@ -1,4 +1,4 @@
-ask:
+task:
   container:
     image: $ELECTRUM_IMAGE
     cpu: 1
