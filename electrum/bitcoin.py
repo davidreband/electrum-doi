@@ -586,19 +586,33 @@ def base_decode(v: Union[bytes, str], *, base: int) -> Optional[bytes]:
     if base == 43:
         chars = __b43chars
         chars_inv = __b43chars_inv
-
-    origlen = len(v)
-    v = v.lstrip(chars[0:1])
-    newlen = len(v)
-
-    num = 0
-    try:
-        for char in v:
-            num = num * base + chars_inv[char]
-    except KeyError:
-        raise BaseDecodeError('Forbidden character {} for base {}'.format(char, base))
-
-    return num.to_bytes(origlen - newlen + (num.bit_length() + 7) // 8, 'big')
+    long_value = 0
+    power_of_base = 1
+    for c in v[::-1]:
+        try:
+            digit = chars_inv[c]
+        except KeyError:
+            raise BaseDecodeError('Forbidden character {} for base {}'.format(c, base))
+        # naive but slow variant:   long_value += digit * (base**i)
+        long_value += digit * power_of_base
+        power_of_base *= base
+    result = bytearray()
+    while long_value >= 256:
+        div, mod = divmod(long_value, 256)
+        result.append(mod)
+        long_value = div
+    result.append(long_value)
+    nPad = 0
+    for c in v:
+        if c == chars[0]:
+            nPad += 1
+        else:
+            break
+    result.extend(b'\x00' * nPad)
+    if length is not None and len(result) != length:
+        return None
+    result.reverse()
+    return bytes(result)
 
 
 class InvalidChecksum(BaseDecodeError):
