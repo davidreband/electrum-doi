@@ -1286,7 +1286,7 @@ class TxMinedInfo(NamedTuple):
 class ShortID(bytes):
 
     def __repr__(self):
-        return f"<ShortID: {format_short_channel_id(self)}>"
+        return f"<ShortID: {format_short_id(self)}>"
 
     def __str__(self):
         return format_short_id(self)
@@ -1311,7 +1311,7 @@ class ShortID(bytes):
         return ShortID.from_components(*components)
 
     @classmethod
-    def normalize(cls, data: Union[None, str, bytes, 'ShortChannelID']) -> Optional['ShortChannelID']:
+    def normalize(cls, data: Union[None, str, bytes, 'ShortID']) -> Optional['ShortID']:
         if isinstance(data, ShortID) or data is None:
             return data
         if isinstance(data, str):
